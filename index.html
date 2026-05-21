@@ -1017,6 +1017,7 @@
     .fsc-mark  { font-size: 9px; color: var(--gold-20); letter-spacing: 2px; }
     .fsc-hint  { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 </head>
 <body>
 
@@ -1543,6 +1544,10 @@ var WX_SHENG = [1,2,3,4,0]; // 相生: 木→火→土→金→水→木
 var WX_KE    = [2,3,4,0,1]; // 相克: 木→土→水→火→金→木
 var WX_NAME  = ['木','火','土','金','水'];
 
+// 天干/地支汉字 → 五行索引（供 lunar-javascript 字符输出转换）
+var STEM_EL   = {'甲':0,'乙':0,'丙':1,'丁':1,'戊':2,'己':2,'庚':3,'辛':3,'壬':4,'癸':4};
+var BRANCH_EL = {'子':4,'丑':2,'寅':0,'卯':0,'辰':2,'巳':1,'午':1,'未':2,'申':3,'酉':3,'戌':2,'亥':4};
+
 // 月干起始偏移（年干 % 5 决定）: 甲己→丙(2) 乙庚→戊(4) 丙辛→庚(6) 丁壬→壬(8) 戊癸→甲(0)
 var MONTH_STEM_OFFSET = [2,4,6,8,0];
 
@@ -1570,13 +1575,13 @@ var ADVICE_TPL = [
   '今日{t}气大力扶助日主{b}，五行旺盛，贵人自来，万事大吉，大展身手正当时！'
 ];
 
-// 以1900-01-01（甲戌日，stem=0，branch=10）为基准推算任意日期的日干支
+// 用 lunar-javascript 精确获取任意日期的日柱干支（含节气校正）
 function getDayGanzhi(date) {
-  var ref  = new Date(1900, 0, 1);
-  var diff = Math.round((date - ref) / 86400000);
+  var solar = Solar.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  var gz = solar.getLunar().getEightChar().getDay();
   return {
-    stem:   ((diff % 10) + 10) % 10,
-    branch: (((diff + 10) % 12) + 12) % 12
+    stem:   '甲乙丙丁戊己庚辛壬癸'.indexOf(gz[0]),
+    branch: '子丑寅卯辰巳午未申酉戌亥'.indexOf(gz[1])
   };
 }
 
@@ -1893,28 +1898,14 @@ function onBaziSubmit() {
   localStorage.setItem('birthInfo', JSON.stringify(birthInfo));
   App.birthInfo = birthInfo;
 
-  // 年柱：以甲子年(4 AD)为起点推算天干地支
-  var yearStemIdx = ((year - 4) % 10 + 10) % 10;
-  var yearBrIdx   = ((year - 4) % 12 + 12) % 12;
-
-  // 月柱：月干由年干决定偏移（五虎遁年起月法），月支固定 寅=2 → 卯→辰→...
-  var monthStemBase = MONTH_STEM_OFFSET[yearStemIdx % 5]; // 当年寅月天干索引
-  var monthStemIdx  = (monthStemBase + (month - 1) * 2) % 10;
-  var monthBrIdx    = (month + 1) % 12; // 正月=寅(2), 二月=卯(3), ...十二月=丑(1)
-
-  // 日柱：用 getDayGanzhi 精确计算出生日干支（以1900-01-01甲戌日为基准）
-  var birthDateGZ = getDayGanzhi(new Date(year, month - 1, day));
-
-  // 时柱：时干由日干决定（五鼠遁日起时法）
-  var dayForShi    = birthDateGZ.stem; // 出生日天干
-  var shiStemBase  = MONTH_STEM_OFFSET[dayForShi % 5]; // 子时天干
-  var shiStemIdx   = (shiStemBase + shi * 2) % 10;
-
+  // lunar-javascript 精确四柱（月柱以节气为界，非农历初一）
+  var birthSolar = Solar.fromYmdHms(year, month, day, shi * 2, 0, 0);
+  var bazi = birthSolar.getLunar().getEightChar();
   var pillars = [
-    { label: '年柱', tian: TIANGAN[yearStemIdx],        di: DIZHI[yearBrIdx]         },
-    { label: '月柱', tian: TIANGAN[monthStemIdx],       di: DIZHI[monthBrIdx]        },
-    { label: '日柱', tian: TIANGAN[birthDateGZ.stem],   di: DIZHI[birthDateGZ.branch]},
-    { label: '时柱', tian: TIANGAN[shiStemIdx],         di: DIZHI[shi]               }
+    { label: '年柱', tian: bazi.getYear()[0],  di: bazi.getYear()[1]  },
+    { label: '月柱', tian: bazi.getMonth()[0], di: bazi.getMonth()[1] },
+    { label: '日柱', tian: bazi.getDay()[0],   di: bazi.getDay()[1]   },
+    { label: '时柱', tian: bazi.getTime()[0],  di: bazi.getTime()[1]  }
   ];
 
   var pillarsEl = document.getElementById('bazi-pillars');
@@ -1926,7 +1917,7 @@ function onBaziSubmit() {
            '</div>';
   }).join('');
 
-  var birthEl = WX_NAME[TIAN_WX[birthDateGZ.stem]];
+  var birthEl = WX_NAME[STEM_EL[bazi.getDay()[0]]];
   document.getElementById('bazi-desc').textContent =
     '命主' + year + '年' + month + '月' + day + '日生，' +
     (selectedGender === 'male' ? '男命' : '女命') + '。' +
