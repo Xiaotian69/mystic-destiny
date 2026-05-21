@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "命理解析",
+  "navigationBarBackgroundColor": "#1A1033",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#1A1033",
+  "usingComponents": {
+    "birth-picker": "/components/birth-picker/index",
+    "tarot-card": "/components/tarot-card/index"
+  }
+}

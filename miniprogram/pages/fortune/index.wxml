@@ -1,0 +1,7 @@
+<!--pages/fortune/index.wxml-->
+<view class="fortune-page">
+  <view class="placeholder">
+    <text class="placeholder__title">命理解析</text>
+    <text class="placeholder__hint">算卦 · 塔罗 · 星座 三合一（UI 待开发）</text>
+  </view>
+</view>

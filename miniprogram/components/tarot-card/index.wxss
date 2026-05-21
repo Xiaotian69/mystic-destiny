@@ -1,0 +1,23 @@
+/* components/tarot-card/index.wxss */
+.tarot-card {
+  width: 200rpx;
+  height: 320rpx;
+  border: 2rpx solid #C8A951;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C8A951;
+  background: #1A1033;
+}
+
+.tarot-card--reversed {
+  transform: rotate(180deg);
+}
+
+.tarot-card__placeholder {
+  font-size: 22rpx;
+  text-align: center;
+  padding: 16rpx;
+  opacity: 0.6;
+}

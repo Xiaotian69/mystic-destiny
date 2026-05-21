@@ -1,0 +1,7 @@
+<!--pages/profile/index.wxml-->
+<view class="profile-page">
+  <view class="placeholder">
+    <text class="placeholder__title">我的</text>
+    <text class="placeholder__hint">UI 待开发</text>
+  </view>
+</view>

@@ -1,0 +1,28 @@
+/* components/fortune-score/index.wxss */
+.fortune-score {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  color: #C8A951;
+}
+
+.fortune-score__label {
+  font-size: 28rpx;
+}
+
+.fortune-score__stars {
+  display: flex;
+  gap: 4rpx;
+}
+
+.fortune-score__star {
+  color: rgba(200, 169, 81, 0.25);
+}
+
+.fortune-score__star--active {
+  color: #C8A951;
+}
+
+.fortune-score--small .fortune-score__star { font-size: 24rpx; }
+.fortune-score--medium .fortune-score__star { font-size: 32rpx; }
+.fortune-score--large .fortune-score__star { font-size: 48rpx; }

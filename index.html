@@ -1,0 +1,2856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>命理星象</title>
+  <style>
+    /* ══════════════════════════════════════
+       Reset & Base
+       ══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: #0e0a1f;
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC',
+                   'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :root {
+      --bg:          #1A1033;
+      --gold:        #C8A951;
+      --gold-80:     rgba(200,169,81,0.8);
+      --gold-60:     rgba(200,169,81,0.6);
+      --gold-55:     rgba(200,169,81,0.55);
+      --gold-50:     rgba(200,169,81,0.5);
+      --gold-40:     rgba(200,169,81,0.4);
+      --gold-30:     rgba(200,169,81,0.3);
+      --gold-25:     rgba(200,169,81,0.25);
+      --gold-20:     rgba(200,169,81,0.2);
+      --gold-15:     rgba(200,169,81,0.15);
+      --gold-12:     rgba(200,169,81,0.12);
+      --green:       #4ade80;
+      --green-bg:    rgba(74,222,128,0.12);
+      --green-bd:    rgba(74,222,128,0.3);
+      --red:         #f87171;
+      --red-bg:      rgba(248,113,113,0.12);
+      --red-bd:      rgba(248,113,113,0.3);
+      --purple-card: rgba(75,0,130,0.35);
+      --purple-lg:   rgba(75,0,130,0.6);
+    }
+    button { background: none; border: none; cursor: pointer; font-family: inherit; }
+    button:focus { outline: none; }
+    img { display: block; }
+    select, input, textarea {
+      font-family: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    /* ══════════════════════════════════════
+       App Shell
+       ══════════════════════════════════════ */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+    }
+
+    /* ══════════════════════════════════════
+       Pages
+       ══════════════════════════════════════ */
+    .page { display: none; min-height: calc(100vh - 60px); padding-bottom: 16px; }
+    .page.active { display: block; }
+
+    /* ══════════════════════════════════════
+       TabBar
+       ══════════════════════════════════════ */
+    .tabbar {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      height: 60px;
+      background: rgba(12,6,34,0.97);
+      border-top: 1px solid var(--gold-15);
+      display: flex; align-items: stretch;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .tabbar__item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer; transition: opacity 0.2s;
+    }
+    .tabbar__icon  { font-size: 20px; line-height: 1; }
+    .tabbar__label { font-size: 10px; color: var(--gold-40); letter-spacing: 0.5px; }
+    .tabbar__item.active .tabbar__label { color: var(--gold); }
+
+    /* ══════════════════════════════════════
+       Toast
+       ══════════════════════════════════════ */
+    .toast {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.78); color: #fff;
+      padding: 10px 22px; border-radius: 8px;
+      font-size: 14px; z-index: 9999;
+      pointer-events: none; transition: opacity 0.3s;
+    }
+    .toast.hidden { opacity: 0; }
+
+    /* ══════════════════════════════════════
+       Loading
+       ══════════════════════════════════════ */
+    .loading-mask {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+    .loading-mask.hidden { display: none; }
+    .loading-box {
+      background: rgba(26,16,51,0.96);
+      border: 1px solid var(--gold-20);
+      border-radius: 12px; padding: 22px 30px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .loading-spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--gold-30); border-top-color: var(--gold);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    .loading-text { font-size: 13px; color: var(--gold-60); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════════
+       HOME PAGE
+       ══════════════════════════════════════ */
+    .home-page {
+      background: var(--bg); color: var(--gold);
+      padding: 0 16px 24px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .header {
+      display: flex; align-items: center;
+      justify-content: space-between; padding-top: 28px;
+    }
+    .header__user { display: flex; align-items: center; gap: 10px; }
+    .header__avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid var(--gold-50); object-fit: cover;
+      background: var(--gold-12); flex-shrink: 0;
+    }
+    .header__user-info { display: flex; flex-direction: column; gap: 3px; }
+    .header__nickname { font-size: 17px; font-weight: 600; color: var(--gold); letter-spacing: 1px; }
+    .header__greeting { font-size: 11px; color: var(--gold-55); }
+    .header__date { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    .header__date-main { font-size: 15px; font-weight: 500; color: var(--gold); letter-spacing: 1px; }
+    .header__date-solar-term {
+      font-size: 11px; color: var(--gold-80);
+      background: var(--gold-12); border-radius: 10px; padding: 1px 8px;
+    }
+    .header__date-sub { font-size: 10px; color: var(--gold-40); }
+    .overall-card {
+      background: linear-gradient(135deg, var(--purple-lg) 0%, rgba(26,16,51,0.8) 100%);
+      border: 1px solid var(--gold-25); border-radius: 12px;
+      padding: 24px 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .overall-card__label      { font-size: 12px; color: var(--gold-60); letter-spacing: 2px; }
+    .overall-card__stars      { display: flex; gap: 6px; }
+    .overall-card__score-text { font-size: 11px; color: var(--gold-50); letter-spacing: 1px; }
+    .overall-card__advice {
+      font-size: 14px; color: rgba(255,255,255,0.85);
+      line-height: 1.7; text-align: center; letter-spacing: 0.5px; padding: 0 4px;
+    }
+    .overall-card__advice--placeholder { color: var(--gold-30); font-size: 12px; }
+    .star     { font-size: 24px; transition: color 0.2s; }
+    .star--sm { font-size: 14px; }
+    .star--active { color: var(--gold); }
+    .star--dim    { color: var(--gold-20); }
+    .category-row { display: flex; gap: 10px; }
+    .category-card {
+      flex: 1; background: var(--purple-card);
+      border: 1px solid var(--gold-15); border-radius: 10px;
+      padding: 14px 0 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .category-card__icon  { font-size: 20px; }
+    .category-card__name  { font-size: 11px; color: rgba(200,169,81,0.7); letter-spacing: 1px; }
+    .category-card__stars { display: flex; gap: 2px; }
+    .auspice-section {
+      background: rgba(75,0,130,0.25); border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 18px; display: flex;
+    }
+    .auspice-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .auspice-col__header { display: flex; align-items: center; margin-bottom: 2px; }
+    .auspice-col__tag {
+      font-size: 14px; font-weight: 700; letter-spacing: 2px;
+      padding: 2px 10px; border-radius: 10px;
+    }
+    .auspice-col__tag--do    { color: var(--green); background: var(--green-bg); border: 1px solid var(--green-bd); }
+    .auspice-col__tag--avoid { color: var(--red);   background: var(--red-bg);   border: 1px solid var(--red-bd);   }
+    .auspice-col__list { display: flex; flex-direction: column; gap: 8px; }
+    .auspice-col__item { display: flex; align-items: center; gap: 5px; }
+    .auspice-col__dot  { font-size: 9px; flex-shrink: 0; }
+    .auspice-col__dot--do    { color: var(--green); }
+    .auspice-col__dot--avoid { color: var(--red); }
+    .auspice-col__text  { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.5; }
+    .auspice-col__empty { font-size: 12px; color: var(--gold-30); }
+    .auspice-divider { width: 1px; background: var(--gold-15); margin: 0 14px; align-self: stretch; }
+    .footer-btn-wrap { margin-top: 4px; }
+    .footer-btn {
+      width: 100%;
+      background: linear-gradient(90deg, rgba(200,169,81,0.15) 0%, rgba(75,0,130,0.4) 100%);
+      border: 1px solid var(--gold-40); border-radius: 10px;
+      padding: 18px 20px; display: flex; align-items: center; color: var(--gold);
+      transition: opacity 0.2s;
+    }
+    .footer-btn:active { opacity: 0.75; }
+    .footer-btn__icon  { font-size: 14px; margin-right: 8px; color: var(--gold-60); }
+    .footer-btn__text  { flex: 1; font-size: 16px; font-weight: 500; letter-spacing: 1px; color: var(--gold); }
+    .footer-btn__arrow { font-size: 20px; color: var(--gold-50); line-height: 1; }
+
+    /* ══════════════════════════════════════
+       FORTUNE PAGE
+       ══════════════════════════════════════ */
+    .fortune-page { background: var(--bg); color: var(--gold); padding: 0 0 80px; }
+
+    /* Page title bar */
+    .fortune-title-bar {
+      display: flex; align-items: center;
+      padding: 28px 16px 16px;
+    }
+    .fortune-title-bar__text { font-size: 18px; font-weight: 600; letter-spacing: 2px; color: var(--gold); }
+    .fortune-title-bar__sub  { font-size: 11px; color: var(--gold-40); margin-left: 10px; margin-top: 2px; }
+
+    /* Fortune tabs */
+    .fortune-tabs {
+      display: flex; gap: 0;
+      margin: 0 16px 20px;
+      background: rgba(75,0,130,0.2);
+      border: 1px solid var(--gold-15);
+      border-radius: 10px; overflow: hidden;
+    }
+    .fortune-tab {
+      flex: 1; padding: 10px 0;
+      font-size: 14px; letter-spacing: 2px;
+      color: var(--gold-50); transition: all 0.25s;
+      border-right: 1px solid var(--gold-15);
+    }
+    .fortune-tab:last-child { border-right: none; }
+    .fortune-tab.active {
+      background: linear-gradient(135deg, var(--purple-lg), rgba(26,16,51,0.9));
+      color: var(--gold); font-weight: 600;
+    }
+
+    /* Tab content */
+    .fortune-tab-content { display: none; padding: 0 16px; }
+    .fortune-tab-content.active { display: block; }
+
+    /* Birth form */
+    .birth-form {
+      background: rgba(75,0,130,0.25);
+      border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 18px 16px; margin-bottom: 16px;
+    }
+    .birth-form__title {
+      font-size: 13px; color: var(--gold-60);
+      letter-spacing: 2px; margin-bottom: 14px;
+    }
+    .birth-form__row {
+      display: flex; align-items: center;
+      gap: 8px; margin-bottom: 12px;
+    }
+    .birth-form__label {
+      font-size: 12px; color: var(--gold-50);
+      width: 36px; flex-shrink: 0; letter-spacing: 1px;
+    }
+    .birth-form__select {
+      flex: 1; height: 36px;
+      background: rgba(26,16,51,0.8);
+      border: 1px solid var(--gold-20);
+      border-radius: 8px; padding: 0 10px;
+      color: var(--gold); font-size: 13px;
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C8A951' opacity='.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .birth-form__select option { background: #1A1033; }
+    .birth-form__gender-row { display: flex; gap: 10px; margin-bottom: 12px; padding-left: 44px; }
+    .birth-form__gender-btn {
+      flex: 1; height: 36px;
+      border: 1px solid var(--gold-20);
+      border-radius: 8px; font-size: 13px;
+      color: var(--gold-50); transition: all 0.2s;
+    }
+    .birth-form__gender-btn.active {
+      background: rgba(200,169,81,0.15);
+      border-color: var(--gold-50); color: var(--gold);
+    }
+    .birth-form__submit {
+      width: 100%; height: 42px; margin-top: 4px;
+      background: linear-gradient(90deg, rgba(200,169,81,0.2), rgba(75,0,130,0.5));
+      border: 1px solid var(--gold-40);
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      color: var(--gold); letter-spacing: 3px;
+      transition: opacity 0.2s;
+    }
+    .birth-form__submit:active { opacity: 0.75; }
+
+    /* BaZi result */
+    .bazi-result {
+      background: rgba(75,0,130,0.25);
+      border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 18px; margin-bottom: 16px;
+    }
+    .bazi-result__title { font-size: 13px; color: var(--gold-60); letter-spacing: 2px; margin-bottom: 14px; }
+    .bazi-pillars {
+      display: flex; gap: 8px; margin-bottom: 14px;
+    }
+    .bazi-pillar {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .bazi-pillar__label { font-size: 10px; color: var(--gold-40); }
+    .bazi-pillar__tian {
+      width: 40px; height: 40px;
+      background: rgba(200,169,81,0.12);
+      border: 1px solid var(--gold-25);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--gold);
+    }
+    .bazi-pillar__di {
+      width: 40px; height: 40px;
+      background: rgba(75,0,130,0.4);
+      border: 1px solid var(--gold-20);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: rgba(200,169,81,0.8);
+    }
+    .bazi-desc {
+      font-size: 13px; color: rgba(255,255,255,0.7);
+      line-height: 1.8; letter-spacing: 0.5px;
+    }
+
+    /* Tarot section */
+    .tarot-section { margin-bottom: 16px; }
+    .tarot-section__title {
+      font-size: 13px; color: var(--gold-60);
+      letter-spacing: 2px; margin-bottom: 16px;
+    }
+    .tarot-spread {
+      display: flex; gap: 12px;
+      justify-content: center; margin-bottom: 20px;
+    }
+    .tarot-slot { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .tarot-slot__label { font-size: 10px; color: var(--gold-40); letter-spacing: 1px; }
+
+    /* 3D flip card */
+    .card-flip { width: 80px; height: 130px; perspective: 600px; cursor: pointer; }
+    .card-flip__inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d; transition: transform 0.6s ease;
+    }
+    .card-flip__inner.flipped { transform: rotateY(180deg); }
+    .card-flip__front, .card-flip__back {
+      position: absolute; inset: 0;
+      border-radius: 10px;
+      backface-visibility: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-flip__back {
+      background: linear-gradient(135deg, #2d0a5e, #1A1033);
+      border: 1px solid var(--gold-30);
+      font-size: 28px;
+    }
+    .card-flip__back-pattern {
+      position: absolute; inset: 4px;
+      border: 1px solid var(--gold-15);
+      border-radius: 7px;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 4px,
+        rgba(200,169,81,0.05) 4px, rgba(200,169,81,0.05) 8px
+      );
+    }
+    .card-flip__front {
+      transform: rotateY(180deg);
+      background: linear-gradient(160deg, #3d0a7a, #1e0a40);
+      border: 1px solid var(--gold-40);
+      flex-direction: column; gap: 6px; padding: 8px 6px;
+    }
+    .card-flip__front-emoji { font-size: 26px; }
+    .card-flip__front-name  { font-size: 9px; color: var(--gold-80); text-align: center; line-height: 1.3; }
+
+    .tarot-question-wrap {
+      display: flex; flex-direction: column; gap: 16px;
+      align-items: center; padding: 8px 0 4px;
+    }
+    .tarot-question-label {
+      font-size: 13px; color: var(--gold-60); letter-spacing: 1px;
+      text-align: center; line-height: 1.7;
+    }
+    .tarot-question-input {
+      width: 100%; box-sizing: border-box;
+      background: rgba(75,0,130,0.25);
+      border: 1px solid var(--gold-30);
+      border-radius: 12px; padding: 14px 16px;
+      color: #fff; font-size: 14px; line-height: 1.7;
+      resize: none; min-height: 88px;
+      outline: none; font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .tarot-question-input::placeholder { color: rgba(200,169,81,0.35); }
+    .tarot-question-input:focus { border-color: var(--gold-60); }
+    .tarot-spread-hint {
+      font-size: 12px; color: var(--gold-50);
+      text-align: center; margin-bottom: 4px; letter-spacing: 1px;
+      line-height: 1.7;
+    }
+    /* 牌阵选择器 */
+    .spread-selector-label {
+      font-size: 11px; color: var(--gold-50); letter-spacing: 2px;
+      text-align: center; margin: 12px 0 8px;
+    }
+    .spread-selector {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-bottom: 16px;
+    }
+    .spread-opt {
+      background: rgba(75,0,130,0.25);
+      border: 1px solid var(--gold-20);
+      border-radius: 12px; padding: 10px 8px 8px;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      display: flex; flex-direction: column; gap: 3px; text-align: center;
+    }
+    .spread-opt.active {
+      border-color: var(--gold-60);
+      background: rgba(200,169,81,0.10);
+    }
+    .spread-opt__name  { font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: 1px; }
+    .spread-opt__badge { font-size: 10px; color: var(--gold-40); }
+    .spread-opt__desc  { font-size: 10.5px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+    /* 单张大牌 */
+    .tarot-spread--single { justify-content: center; }
+    .tarot-spread--single .card-flip { width: 110px; height: 178px; }
+    .tarot-spread--single .card-flip__back { font-size: 36px; }
+    .tarot-spread--single .card-flip__front-emoji { font-size: 38px; }
+    .tarot-spread--single .card-flip__front-name { font-size: 12px; }
+    .tarot-spread--single .tarot-slot__label { font-size: 12px; }
+    /* 五芒星阵 */
+    .tarot-spread--five { flex-wrap: wrap; }
+    .tarot-spread--five .card-flip { width: 65px; height: 105px; }
+    .tarot-spread--five .card-flip__back { font-size: 20px; }
+    .tarot-spread--five .card-flip__front-emoji { font-size: 20px; }
+    .tarot-spread--five .card-flip__front-name { font-size: 7.5px; }
+    .tarot-spread--five .card-flip__front { gap: 4px; padding: 6px 4px; }
+    /* 七星大牌 */
+    .tarot-spread--seven { flex-wrap: wrap; }
+    .tarot-spread--seven .card-flip { width: 54px; height: 88px; }
+    .tarot-spread--seven .card-flip__back { font-size: 16px; }
+    .tarot-spread--seven .card-flip__front-emoji { font-size: 16px; }
+    .tarot-spread--seven .card-flip__front-name { font-size: 6.5px; }
+    .tarot-spread--seven .card-flip__front { gap: 3px; padding: 5px 3px; }
+    .tarot-spread--seven .tarot-slot__label { font-size: 9px; }
+    .tarot-ai-result {
+      margin-top: 20px;
+      background: rgba(75,0,130,0.22);
+      border: 1px solid var(--gold-20);
+      border-radius: 14px; padding: 18px 16px;
+    }
+    .tarot-ai-result__title {
+      font-size: 12px; color: var(--gold-50);
+      letter-spacing: 2px; margin-bottom: 12px;
+      text-align: center;
+    }
+    .tarot-ai-result__loading {
+      text-align: center; color: var(--gold-40);
+      font-size: 13px; padding: 8px 0; letter-spacing: 1px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.4; } 50% { opacity: 1; }
+    }
+    .tarot-ai-result__text {
+      font-size: 13.5px; color: rgba(255,255,255,0.84);
+      line-height: 1.85;
+    }
+    .tarot-ai-result__text .msg-section-head {
+      font-size: 13px; margin: 14px 0 5px;
+    }
+    .tarot-ai-result__text .msg-body {
+      font-size: 13.5px; color: rgba(255,255,255,0.84);
+    }
+
+    .tarot-desc {
+      background: rgba(75,0,130,0.2);
+      border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 16px;
+    }
+    .tarot-desc__name    { font-size: 15px; color: var(--gold); font-weight: 600; margin-bottom: 6px; }
+    .tarot-desc__keyword { font-size: 11px; color: var(--gold-50); margin-bottom: 10px; }
+    .tarot-desc__text    { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.8; }
+
+    /* Zodiac section */
+    .zodiac-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 8px; margin-bottom: 16px;
+    }
+    .zodiac-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      background: rgba(75,0,130,0.25);
+      border: 1px solid var(--gold-15);
+      border-radius: 10px; padding: 10px 4px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .zodiac-item.active {
+      background: rgba(200,169,81,0.12);
+      border-color: var(--gold-40);
+    }
+    .zodiac-item__emoji { font-size: 22px; }
+    .zodiac-item__name  { font-size: 10px; color: var(--gold-50); }
+    .zodiac-item.active .zodiac-item__name { color: var(--gold); }
+    .zodiac-result {
+      background: rgba(75,0,130,0.2);
+      border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 16px; display: none;
+    }
+    .zodiac-result.visible { display: block; }
+    .zodiac-result__title { font-size: 15px; color: var(--gold); font-weight: 600; margin-bottom: 10px; }
+    .zodiac-result__text  { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.8; }
+
+    /* AI Button */
+    .ai-btn-wrap {
+      position: fixed; bottom: 68px; left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 448px;
+      z-index: 50;
+    }
+    .ai-btn {
+      width: 100%;
+      background: linear-gradient(90deg, #4b0082, #8b00d4, #4b0082);
+      background-size: 200% 100%;
+      animation: shimmer 3s linear infinite;
+      border: 1px solid var(--gold-50);
+      border-radius: 12px; padding: 14px 20px;
+      display: flex; align-items: center;
+      box-shadow: 0 4px 20px rgba(139,0,212,0.4);
+      transition: opacity 0.2s;
+    }
+    .ai-btn:active { opacity: 0.85; }
+    @keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+    .ai-btn__icon { font-size: 18px; margin-right: 10px; }
+    .ai-btn__text { flex: 1; font-size: 15px; font-weight: 600; color: var(--gold); letter-spacing: 1px; }
+    .ai-btn__star { font-size: 14px; color: var(--gold-60); }
+
+    /* ── Chat Dialog ── */
+    .chat-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      display: flex; align-items: flex-end;
+      backdrop-filter: blur(4px);
+    }
+    .chat-overlay.hidden { display: none; }
+    .chat-dialog {
+      width: 100%; max-width: 480px;
+      margin: 0 auto;
+      height: 75vh;
+      background: #120b2a;
+      border-top: 1px solid var(--gold-25);
+      border-radius: 18px 18px 0 0;
+      display: flex; flex-direction: column;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .chat-header {
+      display: flex; align-items: center;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--gold-15);
+      flex-shrink: 0;
+    }
+    .chat-header__avatar { font-size: 22px; margin-right: 10px; }
+    .chat-header__info   { flex: 1; }
+    .chat-header__name   { font-size: 15px; font-weight: 600; color: var(--gold); }
+    .chat-header__status { font-size: 10px; color: var(--gold-40); }
+    .chat-close {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--gold-12); font-size: 14px;
+      color: var(--gold-50); transition: all 0.2s;
+    }
+    .chat-close:hover { background: var(--gold-20); color: var(--gold); }
+    .chat-messages {
+      flex: 1; overflow-y: auto;
+      padding: 14px 12px; display: flex;
+      flex-direction: column; gap: 12px;
+    }
+    .chat-messages::-webkit-scrollbar { width: 3px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--gold-20); border-radius: 2px; }
+
+    /* Message bubbles */
+    .msg { display: flex; align-items: flex-end; gap: 8px; max-width: 100%; }
+    .msg--user { flex-direction: row-reverse; }
+    .msg__avatar-icon { font-size: 28px; flex-shrink: 0; }
+    .msg__bubble {
+      max-width: 72%; padding: 10px 13px;
+      font-size: 14px; line-height: 1.6;
+      border-radius: 14px; word-break: break-all;
+    }
+    .msg--ai   .msg__bubble { background: rgba(75,0,130,0.5); color: rgba(255,255,255,0.88); border-bottom-left-radius: 4px; }
+    .msg--user .msg__bubble { background: rgba(200,169,81,0.25); color: var(--gold); border-bottom-right-radius: 4px; }
+    .msg--think .msg__bubble {
+      background: rgba(75,0,130,0.3); color: var(--gold-50);
+      font-size: 13px; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .think-dots { display: flex; gap: 4px; }
+    .think-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold-40); animation: blink 1.2s infinite;
+    }
+    .think-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .think-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+    /* Chat input */
+    .chat-input-row {
+      display: flex; align-items: center;
+      gap: 8px; padding: 10px 12px 14px;
+      border-top: 1px solid var(--gold-15); flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1; height: 40px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--gold-20);
+      border-radius: 20px; padding: 0 14px;
+      color: rgba(255,255,255,0.9); font-size: 14px;
+    }
+    .chat-input::placeholder { color: rgba(255,255,255,0.25); }
+    .chat-send {
+      height: 40px; padding: 0 16px;
+      background: linear-gradient(90deg, rgba(200,169,81,0.3), rgba(75,0,130,0.6));
+      border: 1px solid var(--gold-40);
+      border-radius: 20px; font-size: 13px; font-weight: 600;
+      color: var(--gold); white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .chat-send:active { opacity: 0.75; }
+    .chat-send:disabled { opacity: 0.4; cursor: default; }
+
+    /* AI 回复结构化排版 */
+    .msg-section-head {
+      display: block; color: var(--gold);
+      font-weight: 700; font-size: 13px;
+      margin: 10px 0 4px; letter-spacing: 1px;
+    }
+    .msg-section-head:first-child { margin-top: 0; }
+    .msg-body { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.75; }
+
+    /* ══════════════════════════════════════
+       CALENDAR PAGE
+       ══════════════════════════════════════ */
+    .calendar-page { background: var(--bg); color: var(--gold); padding: 0 0 16px; }
+    .cal-title-bar { padding: 28px 16px 16px; }
+    .cal-title-bar__text { font-size: 18px; font-weight: 600; letter-spacing: 2px; color: var(--gold); }
+
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px 16px;
+    }
+    .cal-nav__btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--gold-12); border: 1px solid var(--gold-20);
+      font-size: 18px; color: var(--gold-60); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cal-nav__btn:active { background: var(--gold-20); color: var(--gold); }
+    .cal-nav__label { font-size: 17px; font-weight: 500; color: var(--gold); letter-spacing: 1px; }
+
+    .cal-weekdays {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 0 12px; margin-bottom: 6px;
+    }
+    .cal-weekday {
+      text-align: center; font-size: 11px;
+      color: var(--gold-40); padding: 4px 0;
+    }
+    .cal-weekday:first-child { color: var(--red); }
+    .cal-weekday:last-child  { color: rgba(100,149,237,0.7); }
+
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 0 12px; gap: 4px;
+    }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 8px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer; transition: all 0.2s;
+      position: relative;
+    }
+    .cal-day:empty { cursor: default; }
+    .cal-day__num  { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1; }
+    .cal-day__dot  { width: 5px; height: 5px; border-radius: 50%; }
+    .cal-day.today { background: rgba(200,169,81,0.12); border: 1px solid var(--gold-30); }
+    .cal-day.today .cal-day__num { color: var(--gold); font-weight: 600; }
+    .cal-day:not(:empty):hover { background: rgba(255,255,255,0.05); }
+    .cal-day.sunday   .cal-day__num { color: rgba(248,113,113,0.7); }
+    .cal-day.saturday .cal-day__num { color: rgba(100,149,237,0.6); }
+
+    /* Fortune dot colors */
+    .dot-5 { background: #C8A951; box-shadow: 0 0 4px rgba(200,169,81,0.6); }
+    .dot-4 { background: #4ade80; }
+    .dot-3 { background: rgba(255,255,255,0.35); }
+    .dot-2 { background: #f97316; }
+    .dot-1 { background: var(--red); }
+
+    .cal-legend {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; padding: 16px 16px 0; flex-wrap: wrap;
+    }
+    .cal-legend__item { display: flex; align-items: center; gap: 5px; }
+    .cal-legend__dot  { width: 8px; height: 8px; border-radius: 50%; }
+    .cal-legend__text { font-size: 11px; color: var(--gold-40); }
+
+    /* ══════════════════════════════════════
+       PROFILE PAGE
+       ══════════════════════════════════════ */
+    .profile-page { background: var(--bg); color: var(--gold); padding: 0 0 16px; }
+
+    .profile-hero {
+      background: linear-gradient(160deg, rgba(75,0,130,0.5), rgba(26,16,51,0.9));
+      padding: 40px 16px 28px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--gold-15);
+    }
+    .profile-hero__avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 2px solid var(--gold-50); object-fit: cover;
+      background: var(--gold-12);
+    }
+    .profile-hero__name  { font-size: 20px; font-weight: 600; color: var(--gold); letter-spacing: 1px; }
+    .profile-hero__sub   { font-size: 12px; color: var(--gold-40); }
+
+    .profile-section { padding: 16px 16px 0; }
+    .profile-section__title {
+      font-size: 11px; color: var(--gold-40);
+      letter-spacing: 2px; margin-bottom: 10px;
+    }
+
+    .profile-birth-card {
+      background: rgba(75,0,130,0.25);
+      border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .profile-birth-row { display: flex; justify-content: space-between; align-items: center; }
+    .profile-birth-label { font-size: 12px; color: var(--gold-50); }
+    .profile-birth-value { font-size: 13px; color: rgba(255,255,255,0.8); }
+    .profile-birth-empty { font-size: 13px; color: var(--gold-30); }
+    .profile-edit-btn {
+      margin-top: 4px; width: 100%; height: 38px;
+      border: 1px solid var(--gold-30); border-radius: 8px;
+      font-size: 13px; color: var(--gold-60); letter-spacing: 1px;
+      background: transparent; transition: all 0.2s;
+    }
+    .profile-edit-btn:active { background: var(--gold-12); color: var(--gold); }
+
+    .settings-list {
+      background: rgba(75,0,130,0.15);
+      border: 1px solid var(--gold-15);
+      border-radius: 12px; overflow: hidden;
+    }
+    .settings-item {
+      display: flex; align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gold-12);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .settings-item:last-child { border-bottom: none; }
+    .settings-item:active { background: var(--gold-12); }
+    .settings-item__icon { font-size: 16px; margin-right: 12px; }
+    .settings-item__text { flex: 1; font-size: 14px; color: rgba(255,255,255,0.75); }
+    .settings-item__arrow { font-size: 16px; color: var(--gold-30); }
+
+    .profile-version {
+      text-align: center; padding: 20px 0 0;
+      font-size: 11px; color: var(--gold-20);
+    }
+
+    /* ══ 彩蛋专属：头像光环 & 入场动画 ══ */
+    @keyframes eggPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(244,168,240,0.55); }
+      50%      { box-shadow: 0 0 0 10px rgba(244,168,240,0); }
+    }
+    @keyframes eggFlash {
+      0%   { opacity: 0; transform: scale(0.75); }
+      60%  { transform: scale(1.10); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .egg-aura  { animation: eggPulse 2.6s ease-in-out infinite; }
+    .egg-flash { animation: eggFlash 0.55s ease-out both; }
+
+    /* ══════════════════════════════════════
+       开场仪式动画
+       ══════════════════════════════════════ */
+    #intro-overlay {
+      position: fixed; inset: 0; z-index: 99999;
+      background: #0e0a1f;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden; cursor: pointer;
+    }
+    #intro-overlay.fade-out {
+      animation: introFadeOut 0.8s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes introFadeOut { to { opacity: 0; visibility: hidden; } }
+    #intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .intro-logo {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .intro-logo__chars { display: flex; gap: 6px; }
+    .intro-logo__char {
+      font-size: 38px; font-weight: 700;
+      color: var(--gold); letter-spacing: 2px;
+      opacity: 0; transform: translateY(22px);
+      animation: charRise 0.55s ease-out forwards;
+      text-shadow: 0 0 20px rgba(200,169,81,0.5);
+    }
+    @keyframes charRise { to { opacity: 1; transform: translateY(0); } }
+    .intro-logo__sub {
+      font-size: 12px; color: var(--gold-40); letter-spacing: 5px;
+      opacity: 0; animation: introFade 0.6s ease-out 1.8s forwards;
+    }
+    .intro-logo__divider {
+      width: 48px; height: 1px; background: var(--gold-30);
+      opacity: 0; animation: introFade 0.6s ease-out 1.4s forwards;
+    }
+    .intro-skip {
+      position: absolute; bottom: 28px;
+      font-size: 11px; color: var(--gold-25); letter-spacing: 2px;
+      opacity: 0; animation: introFade 0.5s ease-out 1.2s forwards;
+    }
+    @keyframes introFade { to { opacity: 1; } }
+
+    /* ══════════════════════════════════════
+       背景随运势变化
+       ══════════════════════════════════════ */
+    .home-page { position: relative; overflow: hidden; }
+    .home-page > * { position: relative; z-index: 1; }
+    .fortune-bg {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      transition: opacity 1.5s ease;
+    }
+    .fortune-bg-5 {
+      background: radial-gradient(ellipse at 50% -10%, rgba(200,169,81,0.22) 0%, transparent 62%);
+      animation: bgPulse5 4s ease-in-out infinite;
+    }
+    .fortune-bg-4 {
+      background: radial-gradient(ellipse at 50% -10%, rgba(200,169,81,0.10) 0%, transparent 55%);
+    }
+    .fortune-bg-2 {
+      background: radial-gradient(ellipse at 50% 110%, rgba(100,120,237,0.13) 0%, transparent 58%);
+    }
+    .fortune-bg-1 {
+      background: radial-gradient(ellipse at 50% 110%, rgba(40,0,80,0.35) 0%, transparent 55%);
+      animation: bgPulse1 5s ease-in-out infinite;
+    }
+    @keyframes bgPulse5 { 0%,100%{opacity:.7} 50%{opacity:1} }
+    @keyframes bgPulse1 { 0%,100%{opacity:.6} 50%{opacity:1} }
+    .fortune-rays {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(
+        -45deg, transparent 0px, transparent 28px,
+        rgba(200,169,81,0.022) 28px, rgba(200,169,81,0.022) 29px
+      );
+      animation: raySlide 8s linear infinite;
+    }
+    @keyframes raySlide { from{background-position:0 0} to{background-position:58px 58px} }
+
+    /* ══════════════════════════════════════
+       塔罗牌面插图
+       ══════════════════════════════════════ */
+    .card-flip__art {
+      width: 100%; flex: 1; display: flex;
+      align-items: center; justify-content: center;
+      overflow: hidden; padding: 4px;
+    }
+    .card-flip__art svg { width: 100%; height: auto; display: block; }
+
+    /* ══════════════════════════════════════
+       每日签文
+       ══════════════════════════════════════ */
+    .sign-section {
+      background: rgba(75,0,130,0.22); border: 1px solid var(--gold-15);
+      border-radius: 12px; padding: 18px 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer; user-select: none; -webkit-user-select: none;
+    }
+    .sign-section__title { font-size: 11px; color: var(--gold-40); letter-spacing: 3px; }
+    .sign-cylinder {
+      width: 46px; height: 64px;
+      background: linear-gradient(to bottom, #4a1a6a, #1e0838);
+      border: 1.5px solid var(--gold-40); border-radius: 4px 4px 10px 10px;
+      display: flex; align-items: flex-end; justify-content: center;
+      gap: 5px; padding-bottom: 8px; position: relative; overflow: visible;
+    }
+    .sign-cylinder::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+      background: linear-gradient(to bottom, rgba(200,169,81,0.4), transparent);
+      border-radius: 4px 4px 0 0;
+    }
+    .sign-stick {
+      width: 3px; border-radius: 2px;
+      background: linear-gradient(to top, #C8A951, rgba(200,169,81,0.4));
+      transform-origin: bottom center;
+    }
+    .sign-stick:nth-child(1) { height: 44px; }
+    .sign-stick:nth-child(2) { height: 52px; }
+    .sign-stick:nth-child(3) { height: 40px; }
+    .sign-cylinder.shaking .sign-stick:nth-child(1) { animation: stickA .65s ease-out; }
+    .sign-cylinder.shaking .sign-stick:nth-child(2) { animation: stickB .65s ease-out .04s; }
+    .sign-cylinder.shaking .sign-stick:nth-child(3) { animation: stickC .65s ease-out .08s; }
+    @keyframes stickA { 0%,100%{transform:rotate(0)} 25%{transform:rotate(28deg)} 60%{transform:rotate(-14deg)} 80%{transform:rotate(8deg)} }
+    @keyframes stickB { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-22deg)} 60%{transform:rotate(18deg)} 80%{transform:rotate(-7deg)} }
+    @keyframes stickC { 0%,100%{transform:rotate(0)} 25%{transform:rotate(16deg)} 60%{transform:rotate(-26deg)} 80%{transform:rotate(11deg)} }
+    .sign-hint { font-size: 11px; color: var(--gold-40); letter-spacing: 1px; }
+    .sign-result {
+      width: 100%; display: none;
+      background: rgba(200,169,81,0.06); border: 1px solid var(--gold-20);
+      border-radius: 8px; padding: 12px 14px;
+      animation: signReveal .45s ease-out;
+    }
+    @keyframes signReveal { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .sign-result__level { font-size: 14px; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; }
+    .sign-result__text { font-size: 13px; color: rgba(255,255,255,0.78); line-height: 1.85; }
+    .sign-result__footer { font-size: 10px; color: var(--gold-30); margin-top: 8px; text-align: right; }
+
+    /* ══════════════════════════════════════
+       成就系统
+       ══════════════════════════════════════ */
+    .achievement-popup {
+      position: fixed; top: 68px; left: 50%; transform: translateX(-50%);
+      max-width: 340px; width: 90%;
+      background: linear-gradient(135deg, rgba(75,0,130,0.97), rgba(20,10,45,0.98));
+      border: 1px solid var(--gold-50); border-radius: 14px;
+      padding: 14px 18px; display: flex; align-items: center; gap: 14px;
+      z-index: 99990; pointer-events: none;
+      animation: achievePop .5s cubic-bezier(.175,.885,.32,1.275) both;
+      box-shadow: 0 0 24px rgba(200,169,81,0.2);
+    }
+    .achievement-popup.out { animation: achieveOut .4s ease-in forwards; }
+    @keyframes achievePop {
+      from { opacity:0; transform:translateX(-50%) translateY(-18px) scale(.9); }
+      to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+    }
+    @keyframes achieveOut { to { opacity:0; transform:translateX(-50%) translateY(-14px); } }
+    .achievement-popup__icon { font-size: 28px; flex-shrink: 0; }
+    .achievement-popup__body { display: flex; flex-direction: column; gap: 2px; }
+    .achievement-popup__title { font-size: 10px; color: var(--gold-50); letter-spacing: 2px; }
+    .achievement-popup__name  { font-size: 15px; font-weight: 700; color: var(--gold); }
+    .achievement-popup__desc  { font-size: 11px; color: rgba(255,255,255,0.6); }
+    .achievements-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    }
+    .achieve-badge {
+      background: rgba(75,0,130,0.18); border: 1px solid var(--gold-12);
+      border-radius: 12px; padding: 12px 6px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      transition: all .3s;
+    }
+    .achieve-badge.on {
+      background: rgba(75,0,130,0.42); border-color: var(--gold-40);
+      box-shadow: 0 0 14px rgba(200,169,81,0.12);
+    }
+    .achieve-badge__icon { font-size: 22px; filter: grayscale(1); opacity: .35; transition: all .3s; }
+    .achieve-badge.on .achieve-badge__icon { filter: none; opacity: 1; }
+    .achieve-badge__name { font-size: 10px; color: var(--gold-35, var(--gold-40)); text-align: center; letter-spacing: .5px; line-height: 1.3; }
+    .achieve-badge.on .achieve-badge__name { color: var(--gold); }
+    .achieve-badge__date { font-size: 9px; color: var(--gold-30); }
+
+    /* ══════════════════════════════════════
+       运势分享卡
+       ══════════════════════════════════════ */
+    .fortune-card-overlay {
+      position: fixed; inset: 0; z-index: 99980;
+      background: rgba(0,0,0,0.88);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .fortune-card-overlay.active { opacity: 1; pointer-events: all; }
+    .fortune-share-card {
+      width: 288px;
+      background: linear-gradient(155deg, #2c0c5e 0%, #0d0820 100%);
+      border: 1px solid var(--gold-40); border-radius: 20px;
+      padding: 26px 22px; display: flex; flex-direction: column;
+      align-items: center; gap: 13px;
+      box-shadow: 0 0 48px rgba(200,169,81,0.18), inset 0 0 60px rgba(75,0,130,0.2);
+    }
+    .fsc-logo   { font-size: 10px; color: var(--gold-40); letter-spacing: 4px; }
+    .fsc-date   { font-size: 19px; font-weight: 700; color: var(--gold); letter-spacing: 2px; }
+    .fsc-lunar  { font-size: 11px; color: var(--gold-50); }
+    .fsc-hr     { width: 56%; height: 1px; background: var(--gold-20); }
+    .fsc-stars  { display: flex; gap: 5px; }
+    .fsc-star   { font-size: 21px; }
+    .fsc-advice {
+      font-size: 12.5px; color: rgba(255,255,255,0.82);
+      text-align: center; line-height: 1.85; letter-spacing: .4px; padding: 0 4px;
+    }
+    .fsc-cats   { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; width: 100%; }
+    .fsc-cat    { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .fsc-cat-icon  { font-size: 14px; }
+    .fsc-cat-name  { font-size: 9px; color: var(--gold-50); }
+    .fsc-cat-stars { font-size: 9px; color: var(--gold); letter-spacing: -1px; }
+    .fsc-sign  {
+      font-size: 12px; color: var(--gold-60); text-align: center;
+      line-height: 1.8; padding: 0 8px; font-style: italic;
+    }
+    .fsc-mark  { font-size: 9px; color: var(--gold-20); letter-spacing: 2px; }
+    .fsc-hint  { font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+<!-- ════════ 开场仪式动画（首次访问） ════════ -->
+<div id="intro-overlay" style="display:none" onclick="skipIntro()">
+  <canvas id="intro-canvas"></canvas>
+  <div class="intro-logo">
+    <div class="intro-logo__chars">
+      <span class="intro-logo__char">命</span>
+      <span class="intro-logo__char">理</span>
+      <span class="intro-logo__char">星</span>
+      <span class="intro-logo__char">象</span>
+    </div>
+    <div class="intro-logo__divider"></div>
+    <div class="intro-logo__sub">天机可测 · 命运可期</div>
+  </div>
+  <div class="intro-skip">轻触跳过</div>
+</div>
+
+<div id="app">
+
+  <!-- ════════════════════ HOME PAGE ════════════════════ -->
+  <section id="page-home" class="page active">
+    <div class="home-page">
+      <div class="header">
+        <div class="header__user">
+          <img class="header__avatar" id="home-avatar"
+               src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Ccircle cx='22' cy='22' r='22' fill='%231A1033'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='22'%3E👤%3C/text%3E%3C/svg%3E"
+               alt="头像">
+          <div class="header__user-info">
+            <span class="header__nickname" id="home-nickname">星主</span>
+            <span class="header__greeting">今日运势已为你推演</span>
+          </div>
+        </div>
+        <div class="header__date">
+          <span class="header__date-main"       id="home-lunar-date"></span>
+          <span class="header__date-solar-term"  id="home-solar-term" style="display:none"></span>
+          <span class="header__date-sub"         id="home-date"></span>
+        </div>
+      </div>
+
+      <div class="overall-card">
+        <span class="overall-card__label">今日综合运势</span>
+        <div  class="overall-card__stars"       id="overall-stars"></div>
+        <span class="overall-card__score-text"  id="overall-score-text"></span>
+        <span class="overall-card__advice overall-card__advice--placeholder"
+              id="overall-advice">命理数据加载中…</span>
+      </div>
+
+      <div class="category-row">
+        <div class="category-card">
+          <span class="category-card__icon">💼</span>
+          <span class="category-card__name">事业</span>
+          <div  class="category-card__stars" id="stars-career"></div>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">❤️</span>
+          <span class="category-card__name">感情</span>
+          <div  class="category-card__stars" id="stars-love"></div>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">💰</span>
+          <span class="category-card__name">财运</span>
+          <div  class="category-card__stars" id="stars-wealth"></div>
+        </div>
+        <div class="category-card">
+          <span class="category-card__icon">🌿</span>
+          <span class="category-card__name">健康</span>
+          <div  class="category-card__stars" id="stars-health"></div>
+        </div>
+      </div>
+
+      <div class="auspice-section">
+        <div class="auspice-col">
+          <div class="auspice-col__header">
+            <span class="auspice-col__tag auspice-col__tag--do">宜</span>
+          </div>
+          <div class="auspice-col__list" id="todo-list"></div>
+        </div>
+        <div class="auspice-divider"></div>
+        <div class="auspice-col">
+          <div class="auspice-col__header">
+            <span class="auspice-col__tag auspice-col__tag--avoid">忌</span>
+          </div>
+          <div class="auspice-col__list" id="avoid-list"></div>
+        </div>
+      </div>
+
+      <!-- ── 每日签文 ── -->
+      <div class="sign-section" onclick="shakeSign()">
+        <span class="sign-section__title">每 日 签 文</span>
+        <div class="sign-cylinder" id="sign-cylinder">
+          <div class="sign-stick"></div>
+          <div class="sign-stick"></div>
+          <div class="sign-stick"></div>
+        </div>
+        <span class="sign-hint" id="sign-hint">轻触摇签</span>
+        <div class="sign-result" id="sign-result">
+          <div class="sign-result__level" id="sign-level"></div>
+          <div class="sign-result__text"  id="sign-text"></div>
+          <div class="sign-result__footer">今日签已定 · 明日再来</div>
+        </div>
+      </div>
+
+      <div class="footer-btn-wrap">
+        <button class="footer-btn" onclick="router.go('fortune')">
+          <span class="footer-btn__icon">✦</span>
+          <span class="footer-btn__text">查看完整命理报告</span>
+          <span class="footer-btn__arrow">›</span>
+        </button>
+        <button class="footer-btn" style="margin-top:10px;background:linear-gradient(90deg,rgba(75,0,130,0.4),rgba(200,169,81,0.15))" onclick="generateFortuneCard()">
+          <span class="footer-btn__icon">🌟</span>
+          <span class="footer-btn__text">生成今日运势卡</span>
+          <span class="footer-btn__arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ FORTUNE PAGE ════════════════════ -->
+  <section id="page-fortune" class="page">
+    <div class="fortune-page">
+
+      <div class="fortune-title-bar">
+        <span class="fortune-title-bar__text">命理解析</span>
+        <span class="fortune-title-bar__sub">三合一推演</span>
+      </div>
+
+      <!-- Tab 切换 -->
+      <div class="fortune-tabs">
+        <button class="fortune-tab active" data-tab="bazi"   onclick="switchFortuneTab('bazi')">八 字</button>
+        <button class="fortune-tab"        data-tab="tarot"  onclick="switchFortuneTab('tarot')">塔 罗</button>
+        <button class="fortune-tab"        data-tab="zodiac" onclick="switchFortuneTab('zodiac')">星 座</button>
+      </div>
+
+      <!-- ── 八字 Tab ── -->
+      <div class="fortune-tab-content active" id="tab-bazi">
+        <div class="birth-form">
+          <div class="birth-form__title">输入生辰信息</div>
+          <div class="birth-form__row">
+            <span class="birth-form__label">年</span>
+            <select class="birth-form__select" id="bazi-year"></select>
+          </div>
+          <div class="birth-form__row">
+            <span class="birth-form__label">月</span>
+            <select class="birth-form__select" id="bazi-month"></select>
+          </div>
+          <div class="birth-form__row">
+            <span class="birth-form__label">日</span>
+            <select class="birth-form__select" id="bazi-day"></select>
+          </div>
+          <div class="birth-form__row">
+            <span class="birth-form__label">时辰</span>
+            <select class="birth-form__select" id="bazi-shichen"></select>
+          </div>
+          <div class="birth-form__gender-row">
+            <button class="birth-form__gender-btn active" id="gender-male"   onclick="selectGender('male')">♂ 男</button>
+            <button class="birth-form__gender-btn"        id="gender-female" onclick="selectGender('female')">♀ 女</button>
+          </div>
+          <button class="birth-form__submit" onclick="onBaziSubmit()">推 演 八 字</button>
+        </div>
+
+        <div class="bazi-result" id="bazi-result" style="display:none">
+          <div class="bazi-result__title">命盘解读</div>
+          <div class="bazi-pillars" id="bazi-pillars"></div>
+          <div class="bazi-desc" id="bazi-desc"></div>
+        </div>
+      </div>
+
+      <!-- ── 塔罗 Tab ── -->
+      <div class="fortune-tab-content" id="tab-tarot">
+
+        <!-- 第一步：提问 -->
+        <div class="tarot-section" id="tarot-question-section">
+          <div class="tarot-section__title">塔罗牌阵 · 三牌展开</div>
+          <div class="tarot-question-wrap">
+            <div class="tarot-question-label">
+              在抽牌之前，请先写下你心中所求之事<br>
+              <span style="font-size:11px;opacity:0.7">（如：最近财运如何 / 感情发展会顺利吗）</span>
+            </div>
+            <textarea
+              id="tarot-question-input"
+              class="tarot-question-input"
+              placeholder="请在这里写下你想问塔罗的问题…"
+              rows="3"
+            ></textarea>
+            <div class="spread-selector-label">选 择 牌 阵</div>
+            <div class="spread-selector">
+              <div class="spread-opt" data-spread="single" onclick="selectSpread('single')">
+                <div class="spread-opt__name">今日一语</div>
+                <div class="spread-opt__badge">1 张</div>
+                <div class="spread-opt__desc">今天最需要知道的一件事</div>
+              </div>
+              <div class="spread-opt active" data-spread="triangle" onclick="selectSpread('triangle')">
+                <div class="spread-opt__name">心灵三角</div>
+                <div class="spread-opt__badge">3 张</div>
+                <div class="spread-opt__desc">渴望 · 阻碍 · 指引</div>
+              </div>
+              <div class="spread-opt" data-spread="star" onclick="selectSpread('star')">
+                <div class="spread-opt__name">五芒星阵</div>
+                <div class="spread-opt__badge">5 张</div>
+                <div class="spread-opt__desc">五维能量深度解析</div>
+              </div>
+              <div class="spread-opt" data-spread="seven" onclick="selectSpread('seven')">
+                <div class="spread-opt__name">七星大牌</div>
+                <div class="spread-opt__badge">7 张</div>
+                <div class="spread-opt__desc">完整命运蓝图解读</div>
+              </div>
+            </div>
+            <button class="birth-form__submit" onclick="openTarotSpread()">开 启 塔 罗 牌 阵</button>
+          </div>
+        </div>
+
+        <!-- 第二步：牌阵（提交问题后出现） -->
+        <div class="tarot-section" id="tarot-spread-section" style="display:none">
+          <div class="tarot-section__title" id="tarot-spread-title">心灵三角 · 三张展开</div>
+          <div class="tarot-spread-hint">请用心凝视，依次点击翻开属于你的命运牌面 ✦</div>
+          <div class="tarot-spread" id="tarot-spread"></div>
+          <button class="birth-form__submit" style="margin-top:4px;margin-bottom:16px"
+                  onclick="resetTarot()">重 新 提 问</button>
+          <div class="tarot-desc" id="tarot-desc" style="display:none"></div>
+          <!-- AI 自动解读区 -->
+          <div class="tarot-ai-result" id="tarot-ai-result" style="display:none">
+            <div class="tarot-ai-result__title">✦ 星盘详解 ✦</div>
+            <div id="tarot-ai-loading" class="tarot-ai-result__loading">正在为你解读命运牌面，请稍候…</div>
+            <div id="tarot-ai-text"    class="tarot-ai-result__text"    style="display:none"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── 星座 Tab ── -->
+      <div class="fortune-tab-content" id="tab-zodiac">
+        <div class="tarot-section__title" style="margin-bottom:12px">选择你的星座</div>
+        <div class="zodiac-grid" id="zodiac-grid"></div>
+        <div class="zodiac-result" id="zodiac-result"></div>
+      </div>
+
+    </div><!-- .fortune-page -->
+
+    <!-- AI 大师按钮（固定在底部） -->
+    <div class="ai-btn-wrap">
+      <button class="ai-btn" onclick="openChat()">
+        <span class="ai-btn__icon">🔮</span>
+        <span class="ai-btn__text">向 AI 玄学大师提问</span>
+        <span class="ai-btn__star">✦</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ════════════════════ CALENDAR PAGE ════════════════════ -->
+  <section id="page-calendar" class="page">
+    <div class="calendar-page">
+      <div class="cal-title-bar">
+        <span class="cal-title-bar__text">运势日历</span>
+      </div>
+      <div class="cal-nav">
+        <button class="cal-nav__btn" onclick="calShiftMonth(-1)">‹</button>
+        <span class="cal-nav__label" id="cal-month-label"></span>
+        <button class="cal-nav__btn" onclick="calShiftMonth(1)">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <div class="cal-weekday">日</div>
+        <div class="cal-weekday">一</div>
+        <div class="cal-weekday">二</div>
+        <div class="cal-weekday">三</div>
+        <div class="cal-weekday">四</div>
+        <div class="cal-weekday">五</div>
+        <div class="cal-weekday">六</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend__item"><div class="cal-legend__dot dot-5"></div><span class="cal-legend__text">大吉</span></div>
+        <div class="cal-legend__item"><div class="cal-legend__dot dot-4"></div><span class="cal-legend__text">吉</span></div>
+        <div class="cal-legend__item"><div class="cal-legend__dot dot-3"></div><span class="cal-legend__text">平</span></div>
+        <div class="cal-legend__item"><div class="cal-legend__dot dot-2"></div><span class="cal-legend__text">小凶</span></div>
+        <div class="cal-legend__item"><div class="cal-legend__dot dot-1"></div><span class="cal-legend__text">凶</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ PROFILE PAGE ════════════════════ -->
+  <section id="page-profile" class="page">
+    <div class="profile-page">
+      <div class="profile-hero">
+        <img class="profile-hero__avatar" id="profile-avatar"
+             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%231A1033'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='38'%3E👤%3C/text%3E%3C/svg%3E"
+             alt="头像">
+        <span class="profile-hero__name" id="profile-name">星主</span>
+        <span class="profile-hero__sub">命理推演 · 玄学探索</span>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section__title">生辰档案</div>
+        <div class="profile-birth-card">
+          <div class="profile-birth-row">
+            <span class="profile-birth-label">出生年月日</span>
+            <span class="profile-birth-value" id="profile-birth-date">未设置</span>
+          </div>
+          <div class="profile-birth-row">
+            <span class="profile-birth-label">时辰</span>
+            <span class="profile-birth-value" id="profile-shichen">未设置</span>
+          </div>
+          <div class="profile-birth-row">
+            <span class="profile-birth-label">性别</span>
+            <span class="profile-birth-value" id="profile-gender">未设置</span>
+          </div>
+          <button class="profile-edit-btn" onclick="router.go('fortune')">前往命理页设置生辰</button>
+        </div>
+      </div>
+
+      <div class="profile-section" style="margin-top:16px">
+        <div class="profile-section__title">设置</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="openChat()">
+            <span class="settings-item__icon">🔮</span>
+            <span class="settings-item__text">向 AI 玄学大师提问</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" onclick="showToast('即将上线')">
+            <span class="settings-item__icon">📖</span>
+            <span class="settings-item__text">关于命理星象</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" onclick="showToast('即将上线')">
+            <span class="settings-item__icon">🔒</span>
+            <span class="settings-item__text">隐私政策</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+          <div class="settings-item" onclick="clearCache()">
+            <span class="settings-item__icon">🗑️</span>
+            <span class="settings-item__text">清除本地数据</span>
+            <span class="settings-item__arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section" style="margin-top:16px">
+        <div class="profile-section__title">我的成就</div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+      </div>
+
+      <div class="profile-version">命理星象 v1.0.0</div>
+    </div>
+  </section>
+
+  <!-- ════════ TabBar ════════ -->
+  <nav class="tabbar">
+    <div class="tabbar__item active" data-page="home"     onclick="router.go('home')">
+      <span class="tabbar__icon">🌟</span>
+      <span class="tabbar__label">今日运势</span>
+    </div>
+    <div class="tabbar__item" data-page="fortune"  onclick="router.go('fortune')">
+      <span class="tabbar__icon">🔮</span>
+      <span class="tabbar__label">命理解析</span>
+    </div>
+    <div class="tabbar__item" data-page="calendar" onclick="router.go('calendar')">
+      <span class="tabbar__icon">📅</span>
+      <span class="tabbar__label">运势日历</span>
+    </div>
+    <div class="tabbar__item" data-page="profile"  onclick="router.go('profile')">
+      <span class="tabbar__icon">👤</span>
+      <span class="tabbar__label">我的</span>
+    </div>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Loading -->
+  <div id="loading-mask" class="loading-mask hidden">
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <span class="loading-text" id="loading-text">加载中…</span>
+    </div>
+  </div>
+
+  <!-- ════════ Chat Dialog (全局，挂载在 #app 外层) ════════ -->
+  <div class="chat-overlay hidden" id="chat-overlay" onclick="handleOverlayClick(event)">
+    <div class="chat-dialog" id="chat-dialog">
+      <div class="chat-header">
+        <span class="chat-header__avatar">🔮</span>
+        <div class="chat-header__info">
+          <div class="chat-header__name">玄学大师</div>
+          <div class="chat-header__status">天机可泄 · 有问必答</div>
+        </div>
+        <button class="chat-close" onclick="closeChat()">✕</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg msg--ai">
+          <span class="msg__avatar-icon">🔮</span>
+          <div class="msg__bubble">有何困惑，请尽管道来，老夫自会为你推演天机。</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" type="text"
+               placeholder="输入你的问题…" maxlength="200"
+               onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="chat-send" id="chat-send" onclick="sendMessage()">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ 运势分享卡 ════════ -->
+  <div class="fortune-card-overlay" id="fortune-card-overlay" onclick="closeFortCard(event)">
+    <div class="fortune-share-card" id="fortune-share-card">
+      <div class="fsc-logo">✦ 命理星象 ✦</div>
+      <div class="fsc-date"  id="fsc-date"></div>
+      <div class="fsc-lunar" id="fsc-lunar"></div>
+      <div class="fsc-hr"></div>
+      <div class="fsc-stars" id="fsc-stars"></div>
+      <div class="fsc-advice" id="fsc-advice"></div>
+      <div class="fsc-cats" id="fsc-cats"></div>
+      <div class="fsc-hr"></div>
+      <div class="fsc-sign" id="fsc-sign"></div>
+      <div class="fsc-mark">截图保存 · 分享给朋友</div>
+    </div>
+    <div class="fsc-hint">点击空白关闭</div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+/* ════════════════════════════════════════════
+   工具函数（替代 wx.* API）
+   ════════════════════════════════════════════ */
+var _toastTimer = null;
+function showToast(msg, duration) {
+  duration = duration || 2000;
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function () { el.classList.add('hidden'); }, duration);
+}
+function showLoading(title) {
+  document.getElementById('loading-text').textContent = title || '加载中…';
+  document.getElementById('loading-mask').classList.remove('hidden');
+}
+function hideLoading() {
+  document.getElementById('loading-mask').classList.add('hidden');
+}
+
+/* ════════════════════════════════════════════
+   路由（替代 wx.navigateTo / wx.switchTab）
+   ════════════════════════════════════════════ */
+var router = {
+  current: 'home',
+  go: function (page) {
+    if (this.current === page) return;
+    document.getElementById('page-' + this.current).classList.remove('active');
+    document.querySelectorAll('.tabbar__item').forEach(function (el) {
+      el.classList.remove('active');
+    });
+    document.getElementById('page-' + page).classList.add('active');
+    var tab = document.querySelector('[data-page="' + page + '"]');
+    if (tab) tab.classList.add('active');
+    this.current = page;
+    if (page === 'calendar') renderCalendar(calState.year, calState.month);
+    if (page === 'profile')  initProfile();
+  }
+};
+
+/* ════════════════════════════════════════════
+   全局应用状态（替代 getApp()）
+   ════════════════════════════════════════════ */
+var App = {
+  userInfo:  JSON.parse(localStorage.getItem('userInfo')  || 'null'),
+  birthInfo: JSON.parse(localStorage.getItem('birthInfo') || 'null')
+};
+
+/* ════════════════════════════════════════════
+   农历近似推算（2024-2027）
+   ════════════════════════════════════════════ */
+var LUNAR_MONTH_NAMES = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+var LUNAR_DAY_NAMES   = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+                         '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+                         '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+// 各年春节（正月初一）公历日期 & 各农历月天数
+var LUNAR_DATA = [
+  { cny:[2024,1,10], lens:[29,30,29,30,29,30,30,29,30,29,30,30] },
+  { cny:[2025,0,29], lens:[30,29,30,29,30,30,29,30,29,30,29,30] },
+  { cny:[2026,1,17], lens:[29,30,29,30,29,30,29,30,30,29,30,29] },
+  { cny:[2027,1,6],  lens:[30,29,30,29,30,29,30,30,29,30,29,30] }
+];
+var SOLAR_TERMS = {
+  '0105':'小寒','0120':'大寒','0204':'立春','0219':'雨水',
+  '0306':'惊蛰','0321':'春分','0405':'清明','0420':'谷雨',
+  '0506':'立夏','0521':'小满','0606':'芒种','0622':'夏至',
+  '0707':'小暑','0723':'大暑','0807':'立秋','0823':'处暑',
+  '0908':'白露','0923':'秋分','1008':'寒露','1023':'霜降',
+  '1107':'立冬','1122':'小雪','1207':'大雪','1222':'冬至'
+};
+
+function getLunarDateStr(date) {
+  var entry = null;
+  for (var i = LUNAR_DATA.length - 1; i >= 0; i--) {
+    var c = LUNAR_DATA[i].cny;
+    if (date >= new Date(c[0], c[1], c[2])) { entry = LUNAR_DATA[i]; break; }
+  }
+  if (!entry) return '';
+  var cny  = new Date(entry.cny[0], entry.cny[1], entry.cny[2]);
+  var diff = Math.floor((date - cny) / 86400000);
+  var m = 0, rem = diff;
+  while (m < entry.lens.length && rem >= entry.lens[m]) { rem -= entry.lens[m]; m++; }
+  if (m >= entry.lens.length) return '';
+  return LUNAR_MONTH_NAMES[m] + '月' + LUNAR_DAY_NAMES[rem];
+}
+
+function getSolarTerm(date) {
+  var m = ('0' + (date.getMonth() + 1)).slice(-2);
+  var d = ('0' + date.getDate()).slice(-2);
+  return SOLAR_TERMS[m + d] || '';
+}
+
+/* ════════════════════════════════════════════
+   五行命理推演引擎
+   ════════════════════════════════════════════ */
+// 天干五行: 甲乙=木(0) 丙丁=火(1) 戊己=土(2) 庚辛=金(3) 壬癸=水(4)
+var TIAN_WX  = [0,0,1,1,2,2,3,3,4,4];
+// 地支五行: 子=水 丑=土 寅=木 卯=木 辰=土 巳=火 午=火 未=土 申=金 酉=金 戌=土 亥=水
+var DI_WX    = [4,2,0,0,2,1,1,2,3,3,2,4];
+var WX_SHENG = [1,2,3,4,0]; // 相生: 木→火→土→金→水→木
+var WX_KE    = [2,3,4,0,1]; // 相克: 木→土→水→火→金→木
+var WX_NAME  = ['木','火','土','金','水'];
+
+// 月干起始偏移（年干 % 5 决定）: 甲己→丙(2) 乙庚→戊(4) 丙辛→庚(6) 丁壬→壬(8) 戊癸→甲(0)
+var MONTH_STEM_OFFSET = [2,4,6,8,0];
+
+// 宜忌活动池（索引=今日天干五行）
+var TODO_POOLS = [
+  ['踏青出行','学习进修','结善缘','文书签约','开拓新局'],
+  ['宴请亲友','谈判签约','喜庆礼仪','拜访贵人','出行远游'],
+  ['置业投资','祈福还愿','拜见长辈','静心修身','稳健守成'],
+  ['理财规划','求医问诊','祭祀先祖','谋而后动','整理收纳'],
+  ['冥想静思','求学悟道','沐浴净化','谋划布局','养生调息']
+];
+var AVOID_POOLS = [
+  ['争讼纠纷','急躁冒进','随意破土'],
+  ['哀泣悲伤','轻率许诺','过度劳神'],
+  ['远行冒险','轻举妄动','散财挥霍'],
+  ['争吵口角','轻率借贷','挥霍无度'],
+  ['赌博投机','冲动行事','过度饮食']
+];
+// 总评语模板（{b}=命主五行 {t}=今日五行）
+var ADVICE_TPL = [
+  '今日{t}气冲克日主{b}，宜低调行事，多加思量，切忌轻率决策，韬光养晦以待良时。',
+  '今日{t}气压制日主{b}，运势偏弱，宜守不宜攻，守住现有基业，耐心等待时机转变。',
+  '日主{b}与今日{t}气中和，运势平稳，不急不躁，脚踏实地，稳中求进方为上策。',
+  '日主{b}日逢{t}气助阵，运势向好，宜积极进取，主动争取，诸事可期有所收获。',
+  '今日{t}气大力扶助日主{b}，五行旺盛，贵人自来，万事大吉，大展身手正当时！'
+];
+
+// 以1900-01-01（甲戌日，stem=0，branch=10）为基准推算任意日期的日干支
+function getDayGanzhi(date) {
+  var ref  = new Date(1900, 0, 1);
+  var diff = Math.round((date - ref) / 86400000);
+  return {
+    stem:   ((diff % 10) + 10) % 10,
+    branch: (((diff + 10) % 12) + 12) % 12
+  };
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, Math.round(v))); }
+
+// 确定性洗牌（相同seed结果固定）
+function deterministicShuffle(arr, seed) {
+  var a = arr.slice(), s = seed >>> 0;
+  for (var i = a.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    var j = s % (i + 1);
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// 根据生辰推演今日运势
+function computeFortune(birth) {
+  var today     = new Date();
+  var birthDate = new Date(birth.year, birth.month - 1, birth.day);
+  var birthGZ   = getDayGanzhi(birthDate);  // 出生日干支
+  var todayGZ   = getDayGanzhi(today);      // 今日干支
+  var birthEl   = TIAN_WX[birthGZ.stem];    // 日主五行
+  var todayEl   = TIAN_WX[todayGZ.stem];    // 今日天干五行
+  var todayBrEl = DI_WX[todayGZ.branch];    // 今日地支五行
+
+  // 天干关系 → 基础分（1-5）
+  var base;
+  if (birthEl === todayEl)                base = 3; // 比肩 → 平
+  else if (WX_SHENG[todayEl] === birthEl) base = 5; // 今生我 → 印星 → 大吉
+  else if (WX_SHENG[birthEl] === todayEl) base = 4; // 我生今 → 食伤 → 吉
+  else if (WX_KE[todayEl]    === birthEl) base = 1; // 今克我 → 官杀 → 凶
+  else                                    base = 2; // 我克今 → 财星 → 略弱
+
+  // 地支辅助修正
+  if (WX_SHENG[todayBrEl] === birthEl) base = Math.min(5, base + 1);
+  if (WX_KE[todayBrEl]    === birthEl) base = Math.max(1, base - 1);
+
+  // 出生时辰命局辅助
+  var shiEl = DI_WX[birth.shichen];
+  if (WX_SHENG[shiEl] === birthEl) base = Math.min(5, base + 0.5);
+  if (WX_KE[shiEl]    === birthEl) base = Math.max(1, base - 0.5);
+
+  // 确定性扰动（同八字不同日期结果不同）
+  var seed = (birth.year * 13 + birth.month * 7 + birth.day * 3 + birth.shichen * 5 + today.getDate() * 11) >>> 0;
+
+  var career = clamp(base + (seed       % 3) - 1, 1, 5);
+  var love   = clamp(base + ((seed+17)  % 3) - 1, 1, 5);
+  var wealth = clamp(base + ((seed+31)  % 3) - 1, 1, 5);
+  var health = clamp(base + ((seed+47)  % 3) - 1, 1, 5);
+  var overall = clamp(Math.round((career + love + wealth + health) / 4), 1, 5);
+
+  // 今日宜忌（按今日天干五行取对应池，确定性打乱后截取）
+  var doPool    = deterministicShuffle(TODO_POOLS[todayEl],  seed);
+  var avoidPool = deterministicShuffle(AVOID_POOLS[todayEl], seed + 7);
+  var doCount   = 3 + (seed % 2 === 0 ? 1 : 0);
+  var avoidCount= 2 + (seed % 3 === 0 ? 1 : 0);
+
+  // 总评语
+  var advice = ADVICE_TPL[overall - 1]
+    .replace('{b}', WX_NAME[birthEl])
+    .replace('{t}', WX_NAME[todayEl]);
+
+  return {
+    overallScore:   overall,
+    categoryScores: { career: career, love: love, wealth: wealth, health: health },
+    advice:         advice,
+    todoList:       doPool.slice(0, doCount),
+    avoidList:      avoidPool.slice(0, avoidCount)
+  };
+}
+
+/* ════════════════════════════════════════════
+   专属浪漫彩蛋（悦儿星盘）
+   ════════════════════════════════════════════ */
+var EASTER_EGG_BIRTH = { year: 2007, month: 10, day: 17, shichen: 8 };
+var _easterEggActive = false;
+
+function isEasterEgg(birth) {
+  return birth
+    && birth.year    === EASTER_EGG_BIRTH.year
+    && birth.month   === EASTER_EGG_BIRTH.month
+    && birth.day     === EASTER_EGG_BIRTH.day
+    && birth.shichen === EASTER_EGG_BIRTH.shichen;
+}
+
+// 生成新月星空 SVG 头像（尺寸可变）
+function makeEasterAvatarSrc(size) {
+  var s = size, h = size / 2;
+  var svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + s + ' ' + s + '">' +
+    '<defs><radialGradient id="ebg" cx="40%" cy="38%" r="62%">' +
+      '<stop offset="0%" stop-color="#6e1a90"/>' +
+      '<stop offset="100%" stop-color="#1a0a30"/>' +
+    '</radialGradient></defs>' +
+    '<circle cx="' + h + '" cy="' + h + '" r="' + h + '" fill="url(#ebg)"/>' +
+    // 新月主体（白色圆）
+    '<circle cx="' + h + '" cy="' + (s*0.43) + '" r="' + (s*0.23) + '" fill="#fce8ff"/>' +
+    // 遮蔽圆（制造月牙缺口）
+    '<circle cx="' + (h+s*0.09) + '" cy="' + (s*0.37) + '" r="' + (s*0.18) + '" fill="#3a0860"/>' +
+    // 金色大星
+    '<text x="' + (s*0.09) + '" y="' + (s*0.35) + '" font-size="' + (s*0.21) + '" fill="#C8A951">✦</text>' +
+    // 粉色小星 × 3
+    '<text x="' + (s*0.70) + '" y="' + (s*0.26) + '" font-size="' + (s*0.14) + '" fill="#f4b0ec">★</text>' +
+    '<text x="' + (s*0.72) + '" y="' + (s*0.74) + '" font-size="' + (s*0.17) + '" fill="#f4b0ec">✦</text>' +
+    '<text x="' + (s*0.07) + '" y="' + (s*0.80) + '" font-size="' + (s*0.13) + '" fill="#C8A951">★</text>' +
+    '<text x="' + (s*0.36) + '" y="' + (s*0.91) + '" font-size="' + (s*0.11) + '" fill="#f4b0ec">✦</text>' +
+    '</svg>';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+// 粒子喷发（仅在首次触发时调用）
+function triggerEasterEggParticles() {
+  var items = ['✦', '💫', '🌙', '⭐', '✨', '💖', '🌸'];
+  for (var i = 0; i < 16; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var el = document.createElement('span');
+        el.textContent = items[idx % items.length];
+        el.style.cssText =
+          'position:fixed;pointer-events:none;z-index:9999;' +
+          'left:' + (10 + Math.random() * 80) + '%;' +
+          'top:'  + (5  + Math.random() * 45) + '%;' +
+          'font-size:' + (12 + Math.random() * 20) + 'px;' +
+          'opacity:1;will-change:transform,opacity;' +
+          'transition:all 1.7s cubic-bezier(0.22,1,0.36,1);';
+        document.body.appendChild(el);
+        requestAnimationFrame(function() {
+          el.style.transform = 'translateY(-80px) rotate(' + (Math.random()*90-45) + 'deg)';
+          el.style.opacity   = '0';
+        });
+        setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 1800);
+      }, idx * 65);
+    })(i);
+  }
+}
+
+function applyEasterEggUI() {
+  _easterEggActive = true;
+  // 昵称
+  document.getElementById('home-nickname').textContent = '悦儿';
+  document.getElementById('profile-name').textContent  = '悦儿';
+  // 专属月牙星空头像 + 动画
+  var avatarEl  = document.getElementById('home-avatar');
+  var profileEl = document.getElementById('profile-avatar');
+  avatarEl.src  = makeEasterAvatarSrc(44);
+  profileEl.src = makeEasterAvatarSrc(80);
+  avatarEl.classList.add('egg-aura', 'egg-flash');
+  profileEl.classList.add('egg-aura');
+  // 欢迎语
+  var greetEl = document.querySelector('.header__greeting');
+  if (greetEl) greetEl.textContent = '星宿历经千年的流转，只为在今日落定属于你的轨迹 ✦';
+}
+
+function resetEasterEggUI() {
+  if (!_easterEggActive) return;
+  _easterEggActive = false;
+  var defaultName = (App.userInfo && App.userInfo.nickName) || '星主';
+  document.getElementById('home-nickname').textContent = defaultName;
+  document.getElementById('profile-name').textContent  = defaultName;
+  var avatarEl  = document.getElementById('home-avatar');
+  var profileEl = document.getElementById('profile-avatar');
+  avatarEl.src  = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Ccircle cx='22' cy='22' r='22' fill='%231A1033'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='22'%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E";
+  profileEl.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%231A1033'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='38'%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E";
+  avatarEl.classList.remove('egg-aura', 'egg-flash');
+  profileEl.classList.remove('egg-aura');
+  var greetEl = document.querySelector('.header__greeting');
+  if (greetEl) greetEl.textContent = '今日运势已为你推演';
+}
+
+// 将推演结果更新到首页
+function updateHomeWithFortune(fortune) {
+  renderStars('overall-stars', fortune.overallScore, false);
+  document.getElementById('overall-score-text').textContent = fortune.overallScore + ' / 5';
+  var advEl = document.getElementById('overall-advice');
+  advEl.textContent = fortune.advice;
+  advEl.classList.remove('overall-card__advice--placeholder');
+  renderStars('stars-career', fortune.categoryScores.career, true);
+  renderStars('stars-love',   fortune.categoryScores.love,   true);
+  renderStars('stars-wealth', fortune.categoryScores.wealth, true);
+  renderStars('stars-health', fortune.categoryScores.health, true);
+  renderList('todo-list',  fortune.todoList,  'do');
+  renderList('avoid-list', fortune.avoidList, 'avoid');
+  applyFortuneBg(fortune.overallScore);
+  checkDailyAchievements(fortune.overallScore);
+}
+
+/* ════════════════════════════════════════════
+   渲染辅助
+   ════════════════════════════════════════════ */
+function renderStars(id, score, small) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var html = '';
+  for (var i = 1; i <= 5; i++) {
+    html += '<span class="star' + (small ? ' star--sm' : '') +
+            (i <= score ? ' star--active' : ' star--dim') + '">★</span>';
+  }
+  el.innerHTML = html;
+}
+function renderList(id, items, type) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (!items || !items.length) {
+    el.innerHTML = '<span class="auspice-col__empty">暂无数据</span>'; return;
+  }
+  var html = '';
+  for (var i = 0; i < items.length; i++) {
+    html += '<div class="auspice-col__item">' +
+            '<span class="auspice-col__dot auspice-col__dot--' + type + '">✦</span>' +
+            '<span class="auspice-col__text">' + items[i] + '</span></div>';
+  }
+  el.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════
+   HOME 页初始化（替代 Page.onLoad）
+   ════════════════════════════════════════════ */
+function initHomePage() {
+  var user = App.userInfo;
+  if (user) {
+    if (user.avatarUrl) document.getElementById('home-avatar').src = user.avatarUrl;
+    if (user.nickName)  document.getElementById('home-nickname').textContent = user.nickName;
+  }
+
+  // 日期栏
+  var d = new Date();
+  document.getElementById('home-date').textContent =
+    d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  var lunarStr = getLunarDateStr(d);
+  document.getElementById('home-lunar-date').textContent = lunarStr;
+  var st   = getSolarTerm(d);
+  var stEl = document.getElementById('home-solar-term');
+  if (st) { stEl.textContent = st; stEl.style.display = ''; }
+  else    { stEl.style.display = 'none'; }
+
+  // 运势推演（有生辰才能算，否则提示用户填写）
+  if (App.birthInfo) {
+    updateHomeWithFortune(computeFortune(App.birthInfo));
+    if (isEasterEgg(App.birthInfo)) applyEasterEggUI();
+  } else {
+    renderStars('overall-stars', 0, false);
+    document.getElementById('overall-score-text').textContent = '待推演';
+    var advEl = document.getElementById('overall-advice');
+    advEl.textContent = '请前往「命理解析」页输入生辰八字，老夫方能为你精准推演今日运势。';
+    advEl.classList.add('overall-card__advice--placeholder');
+    renderStars('stars-career', 0, true);
+    renderStars('stars-love',   0, true);
+    renderStars('stars-wealth', 0, true);
+    renderStars('stars-health', 0, true);
+    renderList('todo-list',  ['填写生辰八字','开启命理推演'], 'do');
+    renderList('avoid-list', ['轻举妄动'], 'avoid');
+  }
+}
+
+/* ════════════════════════════════════════════
+   FORTUNE 页 ── Tab 切换
+   ════════════════════════════════════════════ */
+function switchFortuneTab(tab) {
+  document.querySelectorAll('.fortune-tab').forEach(function (el) { el.classList.remove('active'); });
+  document.querySelectorAll('.fortune-tab-content').forEach(function (el) { el.classList.remove('active'); });
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+/* ════════════════════════════════════════════
+   FORTUNE 页 ── 八字
+   ════════════════════════════════════════════ */
+var TIANGAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var DIZHI   = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var SHICHEN = ['子时(0-1时)','丑时(1-3时)','寅时(3-5时)','卯时(5-7时)',
+               '辰时(7-9时)','巳时(9-11时)','午时(11-13时)','未时(13-15时)',
+               '申时(15-17时)','酉时(17-19时)','戌时(19-21时)','亥时(21-23时)'];
+var selectedGender = 'male';
+
+function initBaziForm() {
+  var yearSel = document.getElementById('bazi-year');
+  var now = new Date().getFullYear();
+  for (var y = now; y >= 1924; y--) {
+    var opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + ' 年';
+    yearSel.appendChild(opt);
+  }
+  var monthSel = document.getElementById('bazi-month');
+  for (var m = 1; m <= 12; m++) {
+    var opt2 = document.createElement('option');
+    opt2.value = m; opt2.textContent = m + ' 月';
+    monthSel.appendChild(opt2);
+  }
+  var daySel = document.getElementById('bazi-day');
+  for (var d = 1; d <= 31; d++) {
+    var opt3 = document.createElement('option');
+    opt3.value = d; opt3.textContent = d + ' 日';
+    daySel.appendChild(opt3);
+  }
+  var shiSel = document.getElementById('bazi-shichen');
+  SHICHEN.forEach(function (s, i) {
+    var opt4 = document.createElement('option');
+    opt4.value = i; opt4.textContent = s;
+    shiSel.appendChild(opt4);
+  });
+}
+function selectGender(g) {
+  selectedGender = g;
+  document.getElementById('gender-male').classList.toggle('active',   g === 'male');
+  document.getElementById('gender-female').classList.toggle('active', g === 'female');
+}
+function onBaziSubmit() {
+  var year  = parseInt(document.getElementById('bazi-year').value);
+  var month = parseInt(document.getElementById('bazi-month').value);
+  var day   = parseInt(document.getElementById('bazi-day').value);
+  var shi   = parseInt(document.getElementById('bazi-shichen').value);
+  var birthInfo = { year: year, month: month, day: day, shichen: shi, gender: selectedGender };
+  localStorage.setItem('birthInfo', JSON.stringify(birthInfo));
+  App.birthInfo = birthInfo;
+
+  // 年柱：以甲子年(4 AD)为起点推算天干地支
+  var yearStemIdx = ((year - 4) % 10 + 10) % 10;
+  var yearBrIdx   = ((year - 4) % 12 + 12) % 12;
+
+  // 月柱：月干由年干决定偏移（五虎遁年起月法），月支固定 寅=2 → 卯→辰→...
+  var monthStemBase = MONTH_STEM_OFFSET[yearStemIdx % 5]; // 当年寅月天干索引
+  var monthStemIdx  = (monthStemBase + (month - 1) * 2) % 10;
+  var monthBrIdx    = (month + 1) % 12; // 正月=寅(2), 二月=卯(3), ...十二月=丑(1)
+
+  // 日柱：用 getDayGanzhi 精确计算出生日干支（以1900-01-01甲戌日为基准）
+  var birthDateGZ = getDayGanzhi(new Date(year, month - 1, day));
+
+  // 时柱：时干由日干决定（五鼠遁日起时法）
+  var dayForShi    = birthDateGZ.stem; // 出生日天干
+  var shiStemBase  = MONTH_STEM_OFFSET[dayForShi % 5]; // 子时天干
+  var shiStemIdx   = (shiStemBase + shi * 2) % 10;
+
+  var pillars = [
+    { label: '年柱', tian: TIANGAN[yearStemIdx],        di: DIZHI[yearBrIdx]         },
+    { label: '月柱', tian: TIANGAN[monthStemIdx],       di: DIZHI[monthBrIdx]        },
+    { label: '日柱', tian: TIANGAN[birthDateGZ.stem],   di: DIZHI[birthDateGZ.branch]},
+    { label: '时柱', tian: TIANGAN[shiStemIdx],         di: DIZHI[shi]               }
+  ];
+
+  var pillarsEl = document.getElementById('bazi-pillars');
+  pillarsEl.innerHTML = pillars.map(function (p) {
+    return '<div class="bazi-pillar">' +
+           '<span class="bazi-pillar__label">' + p.label + '</span>' +
+           '<div class="bazi-pillar__tian">' + p.tian + '</div>' +
+           '<div class="bazi-pillar__di">'   + p.di   + '</div>' +
+           '</div>';
+  }).join('');
+
+  var birthEl = WX_NAME[TIAN_WX[birthDateGZ.stem]];
+  document.getElementById('bazi-desc').textContent =
+    '命主' + year + '年' + month + '月' + day + '日生，' +
+    (selectedGender === 'male' ? '男命' : '女命') + '。' +
+    '年柱' + pillars[0].tian + pillars[0].di + '，' +
+    '月柱' + pillars[1].tian + pillars[1].di + '，' +
+    '日柱' + pillars[2].tian + pillars[2].di + '，' +
+    '时柱' + pillars[3].tian + pillars[3].di + '。' +
+    '日主天干' + pillars[2].tian + '，五行属' + birthEl + '。' +
+    '完整命局精析请向 AI 玄学大师提问。';
+
+  document.getElementById('bazi-result').style.display = 'block';
+
+  // 同步更新首页运势（核心修复：生辰变化后立即重算首页）
+  updateHomeWithFortune(computeFortune(App.birthInfo));
+  unlockAchievement('firstBazi');
+
+  // 彩蛋判断
+  if (isEasterEgg(birthInfo)) {
+    triggerEasterEggParticles();
+    applyEasterEggUI();
+    showToast('✦ 悦儿专属星盘已开启 ✦', 3000);
+  } else {
+    resetEasterEggUI();
+    showToast('八字推演完成，首页运势已更新');
+  }
+}
+
+/* ════════════════════════════════════════════
+   FORTUNE 页 ── 塔罗
+   ════════════════════════════════════════════ */
+/* 生成塔罗牌 SVG 插图（几何风格） */
+function _tsvg(shapes) {
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 108">' +
+    '<defs><linearGradient id="tbg" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="#200840"/><stop offset="100%" stop-color="#0a0420"/>' +
+    '</linearGradient></defs>' +
+    '<rect width="72" height="108" fill="url(#tbg)"/>' + shapes + '</svg>';
+}
+var TAROT_CARDS = [
+  { name:'愚者', keyword:'新开始·冒险', meaning:'大胆迈出第一步，未知充满可能，跟随直觉踏上旅程',
+    svgArt: _tsvg('<circle cx="54" cy="22" r="13" fill="rgba(248,220,74,.1)" stroke="#f8dc4a" stroke-width="1.4"/><g stroke="#f8dc4a" stroke-width="1" opacity=".7"><line x1="54" y1="5" x2="54" y2="12"/><line x1="54" y1="32" x2="54" y2="39"/><line x1="37" y1="22" x2="44" y2="22"/><line x1="64" y1="22" x2="71" y2="22"/><line x1="43" y1="11" x2="48" y2="16"/><line x1="60" y1="28" x2="65" y2="33"/><line x1="65" y1="11" x2="60" y2="16"/><line x1="43" y1="28" x2="48" y2="33"/></g><path d="M2 88 L46 88 L46 108" stroke="#C8A951" stroke-width="1.4" fill="none"/><circle cx="50" cy="76" r="7" fill="none" stroke="#a78bfa" stroke-width="1.3"/><line x1="50" y1="83" x2="50" y2="91" stroke="#a78bfa" stroke-width="1.3"/><line x1="44" y1="86" x2="56" y2="86" stroke="#a78bfa" stroke-width="1.3"/><line x1="46" y1="91" x2="43" y2="99" stroke="#a78bfa" stroke-width="1.3"/><line x1="54" y1="91" x2="57" y2="99" stroke="#a78bfa" stroke-width="1.3"/>') },
+
+  { name:'魔术师', keyword:'意志·创造力', meaning:'你拥有实现目标所需的一切工具，行动的时机已到',
+    svgArt: _tsvg('<line x1="36" y1="8" x2="36" y2="44" stroke="#C8A951" stroke-width="2"/><circle cx="36" cy="5" r="4.5" fill="#f8dc4a" opacity=".85"/><path d="M16 60 C16 50 26 43 36 60 C46 77 56 70 56 60 C56 50 46 43 36 60 C26 77 16 70 16 60" stroke="#C8A951" stroke-width="1.8" fill="none"/><circle cx="18" cy="82" r="6" fill="rgba(77,217,192,.15)" stroke="#4dd9c0" stroke-width="1.2"/><circle cx="36" cy="82" r="6" fill="rgba(248,113,113,.15)" stroke="#f87171" stroke-width="1.2"/><circle cx="54" cy="82" r="6" fill="rgba(96,165,250,.15)" stroke="#60a5fa" stroke-width="1.2"/><rect x="30" y="95" width="12" height="10" rx="2" fill="rgba(248,220,74,.12)" stroke="#f8dc4a" stroke-width="1.1"/>') },
+
+  { name:'女祭司', keyword:'直觉·神秘', meaning:'倾听内心深处的声音，答案早已藏在你心中',
+    svgArt: _tsvg('<circle cx="36" cy="30" r="20" fill="rgba(161,139,255,.08)" stroke="#a18bff" stroke-width="1.4"/><circle cx="43" cy="27" r="15" fill="#100428"/><rect x="10" y="50" width="9" height="50" rx="2" fill="rgba(200,169,81,.1)" stroke="#C8A951" stroke-width="1.2"/><rect x="53" y="50" width="9" height="50" rx="2" fill="rgba(200,169,81,.1)" stroke="#C8A951" stroke-width="1.2"/><g stroke="#a18bff" stroke-width=".9" fill="none"><path d="M19 60 Q36 54 53 60"/><path d="M19 68 Q36 62 53 68" opacity=".6"/><path d="M19 76 Q36 70 53 76" opacity=".35"/></g><circle cx="36" cy="23" r="5" fill="none" stroke="#f8dc4a" stroke-width="1" opacity=".6"/>') },
+
+  { name:'女皇', keyword:'丰盛·创造', meaning:'丰盛与滋养之时，顺应自然的韵律，美好自然涌现',
+    svgArt: _tsvg('<circle cx="36" cy="28" r="17" fill="rgba(74,222,128,.07)" stroke="#4ade80" stroke-width="1.4"/><line x1="36" y1="45" x2="36" y2="56" stroke="#4ade80" stroke-width="1.4"/><line x1="29" y1="52" x2="43" y2="52" stroke="#4ade80" stroke-width="1.4"/><g stroke="#f8dc4a" stroke-width="1.1" fill="none"><path d="M14 74 C18 66 28 62 36 64 C44 62 54 66 58 74"/><line x1="21" y1="74" x2="18" y2="90"/><line x1="29" y1="71" x2="27" y2="90"/><line x1="36" y1="70" x2="36" y2="90"/><line x1="43" y1="71" x2="45" y2="90"/><line x1="51" y1="74" x2="54" y2="90"/></g><circle cx="36" cy="16" r="4" fill="rgba(248,220,74,.25)" stroke="#f8dc4a" stroke-width="1"/>') },
+
+  { name:'皇帝', keyword:'权威·稳定', meaning:'以理性和纪律掌控局面，建立属于自己的秩序',
+    svgArt: _tsvg('<path d="M18 22 L27 12 L36 18 L45 12 L54 22 L50 38 L22 38 Z" fill="rgba(200,169,81,.1)" stroke="#C8A951" stroke-width="1.4"/><rect x="22" y="38" width="28" height="42" rx="2" fill="rgba(200,169,81,.07)" stroke="#C8A951" stroke-width="1.2"/><line x1="50" y1="46" x2="64" y2="38" stroke="#C8A951" stroke-width="1.4"/><circle cx="66" cy="36" r="4" fill="#f8dc4a" opacity=".75"/><rect x="30" y="52" width="12" height="10" rx="1.5" fill="rgba(200,169,81,.18)"/><line x1="27" y1="90" x2="45" y2="90" stroke="#C8A951" stroke-width="1" opacity=".4"/>') },
+
+  { name:'教皇', keyword:'传统·指引', meaning:'寻求智慧的引导，遵循内心的信念与价值观',
+    svgArt: _tsvg('<rect x="28" y="6" width="16" height="24" rx="2" fill="rgba(200,169,81,.1)" stroke="#C8A951" stroke-width="1.3"/><circle cx="36" cy="12" r="6" fill="rgba(200,169,81,.15)" stroke="#f8dc4a" stroke-width="1.2"/><path d="M30 30 L24 60 L48 60 L42 30 Z" fill="rgba(200,169,81,.08)" stroke="#C8A951" stroke-width="1.2"/><line x1="24" y1="72" x2="48" y2="72" stroke="#C8A951" stroke-width="1"/><line x1="24" y1="80" x2="48" y2="80" stroke="#C8A951" stroke-width="1" opacity=".5"/><rect x="14" y="60" width="8" height="40" rx="2" fill="rgba(96,165,250,.12)" stroke="#60a5fa" stroke-width="1.1"/><rect x="50" y="60" width="8" height="40" rx="2" fill="rgba(96,165,250,.12)" stroke="#60a5fa" stroke-width="1.1"/>') },
+
+  { name:'恋人', keyword:'爱·选择', meaning:'面临重要抉择，遵从内心真实的感受与价值观',
+    svgArt: _tsvg('<circle cx="36" cy="14" r="10" fill="rgba(248,220,74,.12)" stroke="#f8dc4a" stroke-width="1.3"/><g stroke="#f87171" stroke-width="1.3" fill="none"><circle cx="22" cy="52" r="10"/><circle cx="50" cy="52" r="10"/></g><path d="M22 52 C22 38 50 38 50 52" stroke="#f87171" stroke-width="1" fill="none" opacity=".5"/><path d="M36 26 L36 42" stroke="#f8dc4a" stroke-width="1.2" opacity=".7"/><path d="M28 70 Q36 80 44 70" stroke="#f87171" stroke-width="1.2" fill="none"/><path d="M36 80 L36 100" stroke="#f87171" stroke-width="1.2" opacity=".5"/>') },
+
+  { name:'战车', keyword:'意志·胜利', meaning:'以坚定意志克服一切障碍，胜利就在前方',
+    svgArt: _tsvg('<rect x="12" y="14" width="48" height="34" rx="3" fill="rgba(200,169,81,.08)" stroke="#C8A951" stroke-width="1.4"/><path d="M20 48 L8 90 M52 48 L64 90" stroke="#C8A951" stroke-width="1.4"/><line x1="8" y1="90" x2="64" y2="90" stroke="#C8A951" stroke-width="1.5"/><circle cx="20" cy="96" r="6" fill="none" stroke="#f8dc4a" stroke-width="1.3"/><circle cx="52" cy="96" r="6" fill="none" stroke="#f8dc4a" stroke-width="1.3"/><circle cx="36" cy="22" r="6" fill="rgba(248,220,74,.2)" stroke="#f8dc4a" stroke-width="1.2"/><path d="M28 36 L44 36" stroke="#f8dc4a" stroke-width="1" opacity=".6"/>') },
+
+  { name:'力量', keyword:'勇气·耐心', meaning:'温柔而坚定地面对挑战，内在力量是最强的武器',
+    svgArt: _tsvg('<path d="M14 40 C14 30 24 23 36 40 C48 57 58 50 58 40 C58 30 48 23 36 40 C24 57 14 50 14 40" stroke="#C8A951" stroke-width="1.8" fill="none"/><circle cx="36" cy="73" r="16" fill="rgba(248,220,74,.06)" stroke="#f8dc4a" stroke-width="1.4"/><path d="M26 70 L30 63 M46 70 L42 63" stroke="#f8dc4a" stroke-width="1.2"/><path d="M28 76 Q36 82 44 76" stroke="#f8dc4a" stroke-width="1.2" fill="none"/><circle cx="33" cy="71" r="2" fill="#f8dc4a"/><circle cx="39" cy="71" r="2" fill="#f8dc4a"/><path d="M22 65 C18 57 22 47 30 47 M50 65 C54 57 50 47 42 47" stroke="#f8dc4a" stroke-width=".9" fill="none" opacity=".55"/>') },
+
+  { name:'隐士', keyword:'内省·智慧', meaning:'暂时退隐，在静默中寻找真正的方向与答案',
+    svgArt: _tsvg('<circle cx="36" cy="18" r="8" fill="none" stroke="#C8A951" stroke-width="1.3"/><path d="M36 26 L30 55 L42 55 Z" fill="rgba(200,169,81,.1)" stroke="#C8A951" stroke-width="1.2"/><line x1="34" y1="55" x2="28" y2="90" stroke="#C8A951" stroke-width="1.3"/><line x1="38" y1="55" x2="44" y2="90" stroke="#C8A951" stroke-width="1.3"/><line x1="26" y1="90" x2="46" y2="90" stroke="#C8A951" stroke-width="1.2"/><circle cx="58" cy="30" r="5" fill="rgba(248,220,74,.3)" stroke="#f8dc4a" stroke-width="1.2"/><line x1="58" y1="35" x2="58" y2="60" stroke="#f8dc4a" stroke-width="1" opacity=".7"/><path d="M52 44 L64 44" stroke="#f8dc4a" stroke-width=".8" opacity=".5"/>') },
+
+  { name:'命运之轮', keyword:'转机·命运', meaning:'时机已到，生命的轮盘正在转动，拥抱变化',
+    svgArt: _tsvg('<circle cx="36" cy="52" r="30" fill="rgba(200,169,81,.05)" stroke="#C8A951" stroke-width="1.5"/><circle cx="36" cy="52" r="18" fill="none" stroke="#a18bff" stroke-width="1.2"/><circle cx="36" cy="52" r="7" fill="rgba(200,169,81,.18)" stroke="#C8A951" stroke-width="1.2"/><g stroke="#C8A951" stroke-width=".9" opacity=".7"><line x1="36" y1="22" x2="36" y2="45"/><line x1="36" y1="59" x2="36" y2="82"/><line x1="6" y1="52" x2="29" y2="52"/><line x1="43" y1="52" x2="66" y2="52"/><line x1="15" y1="31" x2="29" y2="45"/><line x1="43" y1="59" x2="57" y2="73"/><line x1="57" y1="31" x2="43" y2="45"/><line x1="15" y1="73" x2="29" y2="59"/></g><circle cx="36" cy="14" r="5" fill="rgba(248,220,74,.55)" stroke="#f8dc4a" stroke-width="1"/>') },
+
+  { name:'正义', keyword:'公平·真相', meaning:'一切将得到公正的裁决，诚实面对自己的内心',
+    svgArt: _tsvg('<line x1="36" y1="8" x2="36" y2="76" stroke="#C8A951" stroke-width="1.5"/><line x1="14" y1="36" x2="58" y2="36" stroke="#C8A951" stroke-width="1.4"/><circle cx="14" cy="36" r="3" fill="#f8dc4a"/><circle cx="58" cy="36" r="3" fill="#f8dc4a"/><path d="M14 36 L7 54 Q14 59 21 54 Z" fill="rgba(200,169,81,.14)" stroke="#C8A951" stroke-width="1.1"/><path d="M58 36 L51 54 Q58 59 65 54 Z" fill="rgba(200,169,81,.14)" stroke="#C8A951" stroke-width="1.1"/><path d="M28 76 L44 76 L42 86 L30 86 Z" fill="rgba(200,169,81,.18)" stroke="#C8A951" stroke-width="1.2"/><line x1="18" y1="88" x2="54" y2="88" stroke="#C8A951" stroke-width="1.4"/>') },
+
+  { name:'倒吊人', keyword:'暂停·新视角', meaning:'换个角度看待事物，放下执念往往是最大的智慧',
+    svgArt: _tsvg('<line x1="18" y1="10" x2="54" y2="10" stroke="#C8A951" stroke-width="1.4"/><line x1="18" y1="10" x2="18" y2="28" stroke="#C8A951" stroke-width="1.4"/><line x1="54" y1="10" x2="54" y2="28" stroke="#C8A951" stroke-width="1.4"/><circle cx="36" cy="12" r="3" fill="#f8dc4a"/><line x1="36" y1="28" x2="36" y2="10" stroke="#C8A951" stroke-width="1.3"/><circle cx="36" cy="38" r="8" fill="rgba(161,139,255,.12)" stroke="#a18bff" stroke-width="1.3"/><path d="M36 46 L30 62 M36 46 L42 62" stroke="#a18bff" stroke-width="1.3"/><path d="M30 56 L22 52 M42 56 L50 52" stroke="#a18bff" stroke-width="1.1" fill="none"/><path d="M28 64 L22 76 M44 64 L50 76" stroke="#a18bff" stroke-width="1.1" opacity=".6"/>') },
+
+  { name:'死神', keyword:'转变·终结', meaning:'旧的结束是新生的开始，勇敢放下过去的执念',
+    svgArt: _tsvg('<circle cx="36" cy="26" r="14" fill="rgba(248,113,113,.07)" stroke="#f87171" stroke-width="1.4"/><path d="M28 22 L32 18 L44 18 L48 22" stroke="#f87171" stroke-width="1.2" fill="none"/><circle cx="33" cy="24" r="2.5" fill="none" stroke="#f87171" stroke-width="1.2"/><circle cx="39" cy="24" r="2.5" fill="none" stroke="#f87171" stroke-width="1.2"/><line x1="36" y1="40" x2="36" y2="62" stroke="#f87171" stroke-width="1.4"/><line x1="26" y1="50" x2="46" y2="50" stroke="#f87171" stroke-width="1.2"/><path d="M10 86 Q36 64 62 86" stroke="#f87171" stroke-width="1.4" fill="none"/><line x1="62" y1="86" x2="62" y2="70" stroke="#f87171" stroke-width="1.4"/><path d="M58 75 Q65 70 62 64" stroke="#f87171" stroke-width="1.4" fill="none"/>') },
+
+  { name:'节制', keyword:'平衡·融合', meaning:'保持耐心，在流动中寻找和谐，过犹不及',
+    svgArt: _tsvg('<polygon points="36,8 12,82 60,82" fill="rgba(96,165,250,.07)" stroke="#60a5fa" stroke-width="1.4"/><rect x="18" y="52" width="14" height="22" rx="3" fill="rgba(96,165,250,.12)" stroke="#60a5fa" stroke-width="1.2"/><rect x="40" y="60" width="14" height="22" rx="3" fill="rgba(96,165,250,.12)" stroke="#60a5fa" stroke-width="1.2"/><path d="M25 52 Q36 38 47 60" stroke="#60a5fa" stroke-width="1.5" fill="none"/><circle cx="36" cy="20" r="8" fill="rgba(248,220,74,.14)" stroke="#f8dc4a" stroke-width="1"/><line x1="36" y1="6" x2="36" y2="12" stroke="#f8dc4a" stroke-width="1.2"/>') },
+
+  { name:'恶魔', keyword:'束缚·觉察', meaning:'觉察内心的恐惧与执念，你拥有挣脱枷锁的力量',
+    svgArt: _tsvg('<path d="M18 10 L36 4 L54 10 L58 30 L46 22 L36 36 L26 22 L14 30 Z" fill="rgba(248,113,113,.08)" stroke="#f87171" stroke-width="1.3"/><circle cx="36" cy="48" r="12" fill="rgba(248,113,113,.06)" stroke="#f87171" stroke-width="1.3"/><line x1="28" y1="60" x2="22" y2="80" stroke="#f87171" stroke-width="1.2"/><line x1="44" y1="60" x2="50" y2="80" stroke="#f87171" stroke-width="1.2"/><path d="M22 80 L28 88 L36 80 L44 88 L50 80" stroke="#C8A951" stroke-width="1.2" fill="none"/><circle cx="30" cy="46" r="2" fill="#f87171"/><circle cx="42" cy="46" r="2" fill="#f87171"/>') },
+
+  { name:'塔', keyword:'突破·解放', meaning:'旧有结构的崩塌是为了建立更坚实的基础',
+    svgArt: _tsvg('<rect x="26" y="30" width="20" height="56" rx="2" fill="rgba(248,113,113,.07)" stroke="#f87171" stroke-width="1.4"/><rect x="22" y="22" width="28" height="12" rx="2" fill="rgba(248,113,113,.12)" stroke="#f87171" stroke-width="1.3"/><path d="M36 10 L44 22 L28 22 Z" fill="rgba(248,113,113,.2)" stroke="#f87171" stroke-width="1.2"/><circle cx="18" cy="22" r="5" fill="rgba(248,220,74,.5)" stroke="#f8dc4a" stroke-width="1.2"/><circle cx="58" cy="40" r="4" fill="rgba(248,220,74,.4)" stroke="#f8dc4a" stroke-width="1.2"/><circle cx="14" cy="55" r="3" fill="rgba(248,220,74,.3)" stroke="#f8dc4a" stroke-width="1"/><line x1="36" y1="42" x2="36" y2="56" stroke="#f87171" stroke-width="1" opacity=".5"/><line x1="28" y1="50" x2="44" y2="50" stroke="#f87171" stroke-width="1" opacity=".5"/>') },
+
+  { name:'星星', keyword:'希望·启示', meaning:'黑暗之后必有繁星闪耀，保持希望，宁静等待',
+    svgArt: _tsvg('<path d="M36 6 L39 26 L58 26 L43 38 L49 58 L36 46 L23 58 L29 38 L14 26 L33 26 Z" fill="rgba(96,165,250,.1)" stroke="#60a5fa" stroke-width="1.4"/><path d="M0 90 Q18 84 36 90 Q54 96 72 90" stroke="#60a5fa" stroke-width="1.2" fill="none"/><path d="M0 98 Q18 92 36 98 Q54 104 72 98" stroke="#60a5fa" stroke-width=".9" fill="none" opacity=".5"/><circle cx="16" cy="16" r="3.5" fill="none" stroke="#f8dc4a" stroke-width="1"/><circle cx="62" cy="12" r="2.5" fill="none" stroke="#f8dc4a" stroke-width="1"/><circle cx="10" cy="48" r="2" fill="none" stroke="#f8dc4a" stroke-width="1"/><circle cx="66" cy="44" r="2.5" fill="none" stroke="#f8dc4a" stroke-width="1"/>') },
+
+  { name:'月亮', keyword:'幻象·迷惑', meaning:'表象之下有更深的真相，跟随直觉穿越迷雾',
+    svgArt: _tsvg('<circle cx="36" cy="28" r="19" fill="rgba(161,139,255,.1)" stroke="#a18bff" stroke-width="1.4"/><circle cx="43" cy="25" r="14" fill="#0a0420"/><ellipse cx="24" cy="27" rx="5.5" ry="3.5" fill="none" stroke="#a18bff" stroke-width=".9" opacity=".6"/><circle cx="32" cy="58" r="2.8" fill="none" stroke="#60a5fa" stroke-width="1.2"/><circle cx="44" cy="65" r="2.8" fill="none" stroke="#60a5fa" stroke-width="1.2"/><circle cx="36" cy="73" r="2.8" fill="none" stroke="#60a5fa" stroke-width="1.2"/><path d="M8 88 L30 88 M42 88 L64 88" stroke="#C8A951" stroke-width="1.2"/><rect x="8" y="78" width="7" height="16" fill="rgba(200,169,81,.14)" stroke="#C8A951" stroke-width="1"/><rect x="57" y="78" width="7" height="16" fill="rgba(200,169,81,.14)" stroke="#C8A951" stroke-width="1"/>') },
+
+  { name:'太阳', keyword:'喜悦·成功', meaning:'光明普照，前途一片光明，活力与喜悦充满心间',
+    svgArt: _tsvg('<circle cx="36" cy="42" r="20" fill="rgba(248,220,74,.14)" stroke="#f8dc4a" stroke-width="2"/><circle cx="36" cy="42" r="10" fill="rgba(248,220,74,.28)"/><g stroke="#f8dc4a" stroke-width="1.5"><line x1="36" y1="16" x2="36" y2="9"/><line x1="36" y1="68" x2="36" y2="75"/><line x1="10" y1="42" x2="3" y2="42"/><line x1="62" y1="42" x2="69" y2="42"/><line x1="19" y1="25" x2="14" y2="20"/><line x1="53" y1="59" x2="58" y2="64"/><line x1="53" y1="25" x2="58" y2="20"/><line x1="19" y1="59" x2="14" y2="64"/></g><path d="M0 92 Q18 86 36 92 Q54 98 72 92" stroke="#f8dc4a" stroke-width="1.2" fill="none" opacity=".5"/>') },
+
+  { name:'审判', keyword:'觉醒·召唤', meaning:'内心的觉醒呼唤你，放下评判，回应命运的召唤',
+    svgArt: _tsvg('<path d="M26 6 L46 6 L52 18 L46 14 L36 20 L26 14 L20 18 Z" fill="rgba(248,220,74,.12)" stroke="#f8dc4a" stroke-width="1.3"/><line x1="36" y1="20" x2="36" y2="38" stroke="#f8dc4a" stroke-width="1.4"/><circle cx="36" cy="48" r="10" fill="rgba(96,165,250,.1)" stroke="#60a5fa" stroke-width="1.3"/><path d="M20 68 L28 58 M52 68 L44 58" stroke="#60a5fa" stroke-width="1.3"/><rect x="18" y="68" width="12" height="28" rx="3" fill="rgba(96,165,250,.1)" stroke="#60a5fa" stroke-width="1.2"/><rect x="42" y="68" width="12" height="28" rx="3" fill="rgba(96,165,250,.1)" stroke="#60a5fa" stroke-width="1.2"/><line x1="22" y1="86" x2="46" y2="86" stroke="#60a5fa" stroke-width=".8" opacity=".4"/>') },
+
+  { name:'世界', keyword:'圆满·整合', meaning:'一个阶段圆满结束，带着收获迈向崭新的旅程',
+    svgArt: _tsvg('<ellipse cx="36" cy="54" rx="26" ry="40" fill="none" stroke="#4ade80" stroke-width="1.5"/><circle cx="36" cy="38" r="5" fill="none" stroke="#C8A951" stroke-width="1.5"/><path d="M36 43 L36 56 M31 48 L41 50" stroke="#C8A951" stroke-width="1.5" fill="none"/><path d="M34 56 L30 66 M38 56 L42 66" stroke="#C8A951" stroke-width="1.5" fill="none"/><circle cx="14" cy="20" r="4" fill="rgba(248,220,74,.4)" stroke="#f8dc4a" stroke-width="1"/><circle cx="58" cy="20" r="4" fill="rgba(248,220,74,.4)" stroke="#f8dc4a" stroke-width="1"/><circle cx="14" cy="88" r="4" fill="rgba(96,165,250,.4)" stroke="#60a5fa" stroke-width="1"/><circle cx="58" cy="88" r="4" fill="rgba(77,217,192,.4)" stroke="#4dd9c0" stroke-width="1"/>') }
+];
+
+var SPREAD_CONFIGS = {
+  single: {
+    name: '今日一语', badge: '1 张',
+    desc: '今天最需要知道的一件事',
+    labels: ['今日指引'],
+    cardClass: 'tarot-spread--single'
+  },
+  triangle: {
+    name: '心灵三角', badge: '3 张',
+    desc: '内心渴望 · 现实阻碍 · 智慧指引',
+    labels: ['内心渴望', '现实阻碍', '智慧指引'],
+    cardClass: ''
+  },
+  star: {
+    name: '五芒星阵', badge: '5 张',
+    desc: '你的当下 · 隐藏障碍 · 远方力量 · 内心声音 · 命运走向',
+    labels: ['你的当下', '隐藏障碍', '远方力量', '内心声音', '命运走向'],
+    cardClass: 'tarot-spread--five'
+  },
+  seven: {
+    name: '七星大牌', badge: '7 张',
+    desc: '根基 · 现状 · 近期 · 障碍 · 外力 · 希望 · 结局',
+    labels: ['根基', '现状', '近期', '障碍', '外力', '希望', '结局'],
+    cardClass: 'tarot-spread--seven'
+  }
+};
+
+var drawnCards     = [];
+var tarotQuestion  = '';
+var selectedSpread = 'triangle';
+
+function selectSpread(id) {
+  selectedSpread = id;
+  document.querySelectorAll('.spread-opt').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.spread === id);
+  });
+}
+
+function openTarotSpread() {
+  var q = (document.getElementById('tarot-question-input').value || '').trim();
+  if (!q) { showToast('请先写下你心中所求之事 ✦'); return; }
+  tarotQuestion = q;
+  var cfg = SPREAD_CONFIGS[selectedSpread];
+  document.getElementById('tarot-spread-title').textContent = cfg.name + ' · ' + cfg.badge;
+  document.getElementById('tarot-question-section').style.display = 'none';
+  document.getElementById('tarot-spread-section').style.display   = '';
+  drawTarot();
+  drawnCards.forEach(function (item) { trackTarotDraw(item.card.name); });
+  fetchTarotReading();
+}
+
+function fetchTarotReading() {
+  var resultEl  = document.getElementById('tarot-ai-result');
+  var loadingEl = document.getElementById('tarot-ai-loading');
+  var textEl    = document.getElementById('tarot-ai-text');
+  resultEl.style.display  = '';
+  loadingEl.style.display = '';
+  textEl.style.display    = 'none';
+  textEl.textContent      = '';
+
+  var cfg = SPREAD_CONFIGS[selectedSpread] || SPREAD_CONFIGS.triangle;
+  askMaster('我刚刚进行了「' + cfg.name + '」牌阵（' + cfg.badge + '），请结合我的生辰八字、本次抽到的所有塔罗牌和它们各自的位置含义，以及我在【塔罗提问】里写的问题，给出完整详细的牌阵解读。', 'tarot')
+    .then(function(reply) {
+      loadingEl.style.display = 'none';
+      textEl.innerHTML        = formatAiText(reply);
+      textEl.style.display    = '';
+    })
+    .catch(function() {
+      loadingEl.textContent      = '解读加载失败，请稍后重试。';
+      loadingEl.style.animation  = 'none';
+    });
+}
+
+function resetTarot() {
+  tarotQuestion = '';
+  drawnCards    = [];
+  document.getElementById('tarot-question-input').value           = '';
+  document.getElementById('tarot-question-section').style.display = '';
+  document.getElementById('tarot-spread-section').style.display   = 'none';
+  document.getElementById('tarot-spread').innerHTML               = '';
+  document.getElementById('tarot-desc').style.display             = 'none';
+  document.getElementById('tarot-ai-result').style.display        = 'none';
+  document.getElementById('tarot-ai-text').textContent            = '';
+}
+
+function drawTarot() {
+  var cfg  = SPREAD_CONFIGS[selectedSpread];
+  var deck = TAROT_CARDS.slice().sort(function() { return Math.random() - 0.5; });
+  drawnCards = deck.slice(0, cfg.labels.length).map(function(c) {
+    return { card: c, reversed: Math.random() > 0.7 };
+  });
+  var spreadEl = document.getElementById('tarot-spread');
+  spreadEl.className = 'tarot-spread' + (cfg.cardClass ? ' ' + cfg.cardClass : '');
+  spreadEl.innerHTML = drawnCards.map(function(item, idx) {
+    return '<div class="tarot-slot">' +
+      '<span class="tarot-slot__label">' + cfg.labels[idx] + '</span>' +
+      '<div class="card-flip" id="card-' + idx + '" onclick="flipCard(' + idx + ')">' +
+        '<div class="card-flip__inner" id="card-inner-' + idx + '">' +
+          '<div class="card-flip__back">' +
+            '<div class="card-flip__back-pattern"></div>✦' +
+          '</div>' +
+          '<div class="card-flip__front" style="' + (item.reversed ? 'transform:rotateY(180deg) rotate(180deg)' : 'transform:rotateY(180deg)') + '">' +
+            '<div class="card-flip__art">' + item.card.svgArt + '</div>' +
+            '<span class="card-flip__front-name">' + item.card.name + (item.reversed ? '\n逆位' : '') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('tarot-desc').style.display = 'none';
+}
+
+function flipCard(idx) {
+  var inner = document.getElementById('card-inner-' + idx);
+  if (!inner) return;
+  inner.classList.toggle('flipped');
+  if (inner.classList.contains('flipped')) {
+    var item = drawnCards[idx];
+    var descEl = document.getElementById('tarot-desc');
+    descEl.innerHTML =
+      '<div class="tarot-desc__name">' + SPREAD_LABELS[idx] + '：' + item.card.name + (item.reversed ? '（逆位）' : '（正位）') + '</div>' +
+      '<div class="tarot-desc__keyword">' + item.card.keyword + '</div>' +
+      '<div class="tarot-desc__text">' + item.card.meaning + (item.reversed ? '。逆位提示：需注意此能量被阻滞或过度表达。' : '') + '</div>';
+    descEl.style.display = 'block';
+  }
+}
+
+/* ════════════════════════════════════════════
+   FORTUNE 页 ── 星座
+   ════════════════════════════════════════════ */
+var ZODIAC_LIST = [
+  { emoji:'♈', name:'白羊', dates:'3.21-4.19', advice:'今日行动力爆棚，适合开拓新领域，注意急躁情绪。' },
+  { emoji:'♉', name:'金牛', dates:'4.20-5.20', advice:'财运稳步上升，耐心等待会有意想不到的收获。' },
+  { emoji:'♊', name:'双子', dates:'5.21-6.21', advice:'沟通能力超强，今日适合谈判与交流，多做多得。' },
+  { emoji:'♋', name:'巨蟹', dates:'6.22-7.22', advice:'情感敏锐，家庭关系和谐，今日适合表达爱意。' },
+  { emoji:'♌', name:'狮子', dates:'7.23-8.22', advice:'魅力四射，领导力显现，注意给他人留有空间。' },
+  { emoji:'♍', name:'处女', dates:'8.23-9.22', advice:'细节把控到位，工作效率高，避免过度完美主义。' },
+  { emoji:'♎', name:'天秤', dates:'9.23-10.23', advice:'社交运势旺盛，贵人助力，感情方面顺心如意。' },
+  { emoji:'♏', name:'天蝎', dates:'10.24-11.22', advice:'洞察力极强，适合深度思考与研究，忌猜疑。' },
+  { emoji:'♐', name:'射手', dates:'11.23-12.21', advice:'冒险精神旺盛，远途有惊喜，保持乐观心态。' },
+  { emoji:'♑', name:'摩羯', dates:'12.22-1.19', advice:'事业稳步推进，坚持计划终见成效，财运良好。' },
+  { emoji:'♒', name:'水瓶', dates:'1.20-2.18',  advice:'创意涌现，灵感丰富，人际关系带来惊喜。' },
+  { emoji:'♓', name:'双鱼', dates:'2.19-3.20',  advice:'直觉准确，艺术感强，感情世界丰富美好。' }
+];
+var selectedZodiac = -1;
+
+function initZodiac() {
+  var grid = document.getElementById('zodiac-grid');
+  grid.innerHTML = ZODIAC_LIST.map(function (z, i) {
+    return '<div class="zodiac-item" id="zodiac-' + i + '" onclick="selectZodiac(' + i + ')">' +
+           '<span class="zodiac-item__emoji">' + z.emoji + '</span>' +
+           '<span class="zodiac-item__name">' + z.name + '</span>' +
+           '</div>';
+  }).join('');
+}
+function selectZodiac(idx) {
+  document.querySelectorAll('.zodiac-item').forEach(function (el) { el.classList.remove('active'); });
+  document.getElementById('zodiac-' + idx).classList.add('active');
+  selectedZodiac = idx;
+  var z = ZODIAC_LIST[idx];
+  var resultEl = document.getElementById('zodiac-result');
+  resultEl.innerHTML =
+    '<div class="zodiac-result__title">' + z.emoji + ' ' + z.name + '座 · ' + z.dates + '</div>' +
+    '<div class="zodiac-result__text">' + z.advice + '</div>';
+  resultEl.classList.add('visible');
+}
+
+/* ════════════════════════════════════════════
+   CALENDAR 页
+   ════════════════════════════════════════════ */
+var calState = (function () {
+  var d = new Date();
+  return { year: d.getFullYear(), month: d.getMonth() };
+})();
+
+function calShiftMonth(delta) {
+  calState.month += delta;
+  if (calState.month > 11) { calState.month = 0;  calState.year++; }
+  if (calState.month < 0)  { calState.month = 11; calState.year--; }
+  renderCalendar(calState.year, calState.month);
+}
+
+function renderCalendar(year, month) {
+  document.getElementById('cal-month-label').textContent =
+    year + ' 年 ' + (month + 1) + ' 月';
+  var grid   = document.getElementById('cal-grid');
+  var today  = new Date();
+  var first  = new Date(year, month, 1).getDay();   /* 0=日 */
+  var total  = new Date(year, month + 1, 0).getDate();
+  var html   = '';
+  for (var i = 0; i < first; i++) html += '<div class="cal-day"></div>';
+  for (var d = 1; d <= total; d++) {
+    var isToday   = (year === today.getFullYear() && month === today.getMonth() && d === today.getDate());
+    var dow       = (first + d - 1) % 7;
+    var cls       = 'cal-day';
+    if (isToday)   cls += ' today';
+    if (dow === 0) cls += ' sunday';
+    if (dow === 6) cls += ' saturday';
+    /* 随机运势色点（实际应由后端提供） */
+    var score = Math.floor(Math.random() * 5) + 1;
+    html += '<div class="' + cls + '">' +
+            '<span class="cal-day__num">' + d + '</span>' +
+            '<div class="cal-day__dot dot-' + score + '"></div>' +
+            '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════
+   PROFILE 页
+   ════════════════════════════════════════════ */
+function initProfile() {
+  var user  = App.userInfo;
+  var birth = App.birthInfo;
+  if (user) {
+    if (user.avatarUrl) document.getElementById('profile-avatar').src = user.avatarUrl;
+    if (user.nickName)  document.getElementById('profile-name').textContent = user.nickName;
+  }
+  if (birth) {
+    document.getElementById('profile-birth-date').textContent =
+      birth.year + '年' + birth.month + '月' + birth.day + '日';
+    document.getElementById('profile-shichen').textContent = SHICHEN[birth.shichen] || '未知';
+    document.getElementById('profile-gender').textContent  = birth.gender === 'male' ? '男' : '女';
+  }
+  // 切换到「我的」页时同步彩蛋状态
+  if (birth && isEasterEgg(birth)) applyEasterEggUI();
+  renderAchievements();
+}
+function clearCache() {
+  if (window.confirm('确定要清除所有本地数据吗？')) {
+    localStorage.clear();
+    App.userInfo  = null;
+    App.birthInfo = null;
+    resetEasterEggUI();
+    showToast('已清除本地数据');
+    initProfile();
+    initHomePage();
+  }
+}
+
+/* ════════════════════════════════════════════
+   DeepSeek 直连配置
+   ════════════════════════════════════════════ */
+const DEEPSEEK_API_KEY = "";
+const DEEPSEEK_API_URL = "https://divine-cell-3e23.andyzhao722.workers.dev";
+
+/* ════════════════════════════════════════════
+   AI 玄学大师聊天
+   ════════════════════════════════════════════ */
+var _thinkingMsgId = null;
+var _chatLocked    = false;
+
+function openChat()  { document.getElementById('chat-overlay').classList.remove('hidden'); }
+function closeChat() { document.getElementById('chat-overlay').classList.add('hidden'); }
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('chat-overlay')) closeChat();
+}
+
+/* 转义 HTML，防止 XSS */
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* 将 AI 回复文本渲染为结构化 HTML
+   把 【...】 小节标题高亮，换行转 <br> */
+function formatAiText(text) {
+  var escaped = escapeHtml(text);
+  /* 把【标题】替换为带样式的 span */
+  escaped = escaped.replace(/【([^】]+)】/g,
+    '<span class="msg-section-head">【$1】</span>');
+  /* 换行 */
+  escaped = escaped.replace(/\n/g, '<br>');
+  return '<span class="msg-body">' + escaped + '</span>';
+}
+
+function addMessage(role, html) {
+  var container = document.getElementById('chat-messages');
+  var div       = document.createElement('div');
+  var msgId     = 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  div.id        = msgId;
+  div.className = 'msg msg--' + role;
+
+  var iconHtml = (role === 'ai' || role === 'think')
+    ? '<span class="msg__avatar-icon">🔮</span>' : '';
+
+  div.innerHTML = iconHtml + '<div class="msg__bubble">' + html + '</div>';
+  container.appendChild(div);
+  /* 滚动到底部 */
+  container.scrollTop = container.scrollHeight;
+  return msgId;
+}
+
+function showThinking() {
+  var html = '大师正在冥想推算中&nbsp;' +
+    '<div class="think-dots"><span></span><span></span><span></span></div>';
+  _thinkingMsgId = addMessage('think', html);
+}
+function hideThinking() {
+  if (_thinkingMsgId) {
+    var el = document.getElementById(_thinkingMsgId);
+    if (el) el.remove();
+    _thinkingMsgId = null;
+  }
+}
+
+/* ════════════════════════════════════════════
+   组装上下文 → 调用 DeepSeek API
+   ════════════════════════════════════════════ */
+function askMaster(question, mode) {
+  mode = mode || 'chat';
+
+  /* ── 1. 收集命理上下文 ── */
+  var birth   = App.birthInfo || {};
+  var tarot   = drawnCards.map(function(item) {
+    return item.card.name + '（' + (item.reversed ? '逆位' : '正位') + '）';
+  });
+  var zodiac  = selectedZodiac >= 0 ? ZODIAC_LIST[selectedZodiac].name + '座' : '未选择';
+  var baziDesc = (document.getElementById('bazi-desc') || {}).textContent || '用户尚未推演八字';
+
+  var birthText = birth.year
+    ? birth.year + '年' + birth.month + '月' + birth.day + '日，' +
+      (SHICHEN[birth.shichen] || '时辰未知') + '，' +
+      (birth.gender === 'male' ? '男命' : '女命')
+    : '用户尚未填写生辰';
+
+  var cfg = SPREAD_CONFIGS[selectedSpread] || SPREAD_CONFIGS.triangle;
+  var tarotText = drawnCards.length
+    ? cfg.name + '（' + cfg.badge + '）\n' +
+      drawnCards.map(function(item, idx) {
+        return '【' + (cfg.labels[idx] || ('牌' + (idx + 1))) + '】' +
+               item.card.name + '（' + (item.reversed ? '逆位' : '正位') + '）' +
+               ' — ' + item.card.keyword;
+      }).join('\n')
+    : '用户尚未抽牌';
+
+  /* ── 2. System Prompt（按模式区分） ── */
+  var BASE_PERSONA =
+    '你是一位温柔治愈的现代心理占星导师，说话风格温暖、阳光、接地气，像一个懂你的好朋友。' +
+    '你用通俗易懂的大白话解读命理与塔罗，绝对不用晦涩玄学术语，充满情绪价值和正能量。\n\n' +
+    '【铁律】\n' +
+    '1. 严格基于用户传来的命理数据解读，不捏造任何未抽到的塔罗牌。\n' +
+    '2. 永远积极正向、给予力量与信心，不传递焦虑或负面情绪。\n\n';
+
+  var systemPrompt;
+  var maxTokens;
+
+  if (mode === 'tarot') {
+    maxTokens = 2000;
+    var posLabels = drawnCards.length
+      ? drawnCards.map(function(item, idx) {
+          var lbl = (cfg && cfg.labels[idx]) ? cfg.labels[idx] : ('位置' + (idx + 1));
+          return '  - 【' + lbl + '】' + item.card.name + '（' + (item.reversed ? '逆位' : '正位') + '）';
+        }).join('\n')
+      : '  （暂无牌）';
+
+    systemPrompt = BASE_PERSONA +
+      '【本次牌阵位置列表，供你逐一解读】\n' + posLabels + '\n\n' +
+
+      '【输出格式】请严格按以下结构逐段输出：\n\n' +
+      '【✦ 牌阵概览】\n' +
+      '结合用户的八字五行特质与提问，用2-3句话描述本次牌阵的整体能量基调。\n\n' +
+
+      '（下方对每一张牌单独写一段，标题格式固定为：【位置名：牌名（正/逆位）】）\n' +
+      '每段4-5句，通俗有温度，紧扣该位置的象征含义，同时结合用户的具体提问给出有针对性的分析与鼓励。\n\n' +
+
+      '【✦ 综合洞见】\n' +
+      '把所有牌的能量串联起来，用3-4句话说明它们共同传递的核心信息和整体方向建议。\n\n' +
+
+      '【✦ 今日行动】\n' +
+      '给出1-2条今天就能做到的极具体小建议，生活化有温度，像好友说的话。\n\n' +
+
+      '总字数根据牌数自然调整（1张约150字，3张约350字，5张约550字，7张约700字），' +
+      '语气亲切自然，排版清晰易读。';
+  } else {
+    maxTokens = 800;
+    systemPrompt = BASE_PERSONA +
+      '【回答结构】每次严格按以下三段输出：\n\n' +
+      '【观象破局】\n用通俗大白话解释当前八字和抽到的塔罗牌，约80字。\n\n' +
+      '【天机直断】\n针对用户提问，给出定向鼓励性解答，多给信心，约100字。\n\n' +
+      '【指点迷津】\n给出1条今天就能做的具体小建议，生活化有温度，不超过50字。\n\n' +
+      '全文200-250字，排版清晰，适合手机阅读。';
+  }
+
+  /* ── 3. User Prompt：携带全部命理数据 ── */
+  var tarotQ = tarotQuestion ? '【塔罗提问】' + tarotQuestion + '\n' : '';
+  var userPrompt =
+    '以下是我的命理档案，请结合这些信息解答我的问题。\n\n' +
+    '【生辰】' + birthText + '\n' +
+    '【八字推演】' + baziDesc + '\n' +
+    '【塔罗三牌阵】' + tarotText + '\n' +
+    '【星座】' + zodiac + '\n' +
+    tarotQ + '\n' +
+    '【我的问题】' + question;
+
+  /* ── 4. 调用 DeepSeek API ── */
+  return fetch(DEEPSEEK_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model:       'deepseek-chat',
+      temperature: 0.85,
+      max_tokens:  maxTokens,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userPrompt  }
+      ]
+    })
+  })
+  .then(function(res) {
+    if (!res.ok) {
+      return res.json().then(function(e) {
+        throw new Error((e.error && e.error.message) || 'HTTP ' + res.status);
+      });
+    }
+    return res.json();
+  })
+  .then(function(data) {
+    return data.choices[0].message.content.trim();
+  });
+}
+
+/* ════════════════════════════════════════════
+   发送消息主流程
+   ════════════════════════════════════════════ */
+function sendMessage() {
+  if (_chatLocked) return;
+  var input = document.getElementById('chat-input');
+  var text  = input.value.trim();
+  if (!text) return;
+
+  _chatLocked = true;
+  document.getElementById('chat-send').disabled = true;
+  input.value = '';
+
+  /* 用户气泡：纯文本转义后直接展示 */
+  addMessage('user', escapeHtml(text));
+  showThinking();
+
+  askMaster(text)
+    .then(function(answer) {
+      hideThinking();
+      /* AI 气泡：结构化格式化渲染 */
+      addMessage('ai', formatAiText(answer));
+      _chatLocked = false;
+      document.getElementById('chat-send').disabled = false;
+    })
+    .catch(function(err) {
+      hideThinking();
+      var errMsg = err && err.message ? err.message : '网络异常';
+      addMessage('ai', formatAiText('天机受扰，推演失败。\n错误详情：' + errMsg + '\n\n请检查 API Key 是否正确，或稍后重试。'));
+      _chatLocked = false;
+      document.getElementById('chat-send').disabled = false;
+    });
+}
+
+/* ════════════════════════════════════════════
+   入口
+   ════════════════════════════════════════════ */
+/* ════════════════════════════════════════════
+   开场仪式动画
+   ════════════════════════════════════════════ */
+var _introSkipped = false;
+
+function skipIntro() {
+  if (_introSkipped) return;
+  _introSkipped = true;
+  var ov = document.getElementById('intro-overlay');
+  ov.classList.add('fade-out');
+  setTimeout(function () { ov.style.display = 'none'; }, 800);
+}
+
+function initIntroAnimation() {
+  if (localStorage.getItem('hasVisited')) return; // not first visit
+  localStorage.setItem('hasVisited', '1');
+
+  var ov  = document.getElementById('intro-overlay');
+  var cvs = document.getElementById('intro-canvas');
+  ov.style.display = 'flex';
+
+  cvs.width  = ov.clientWidth  || window.innerWidth;
+  cvs.height = ov.clientHeight || window.innerHeight;
+  var ctx = cvs.getContext('2d');
+  var cx  = cvs.width / 2, cy = cvs.height / 2;
+
+  var stars = [];
+  for (var i = 0; i < 90; i++) {
+    var ang = Math.random() * Math.PI * 2;
+    var spd = 0.6 + Math.random() * 2.2;
+    stars.push({
+      x: cx, y: cy,
+      vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+      r:  0.6 + Math.random() * 1.8,
+      col: Math.random() > 0.35 ? '#C8A951' : (Math.random() > 0.5 ? '#ffffff' : '#a18bff')
+    });
+  }
+
+  /* logo char stagger */
+  document.querySelectorAll('.intro-logo__char').forEach(function (el, i) {
+    el.style.animationDelay = (0.35 + i * 0.2) + 's';
+  });
+
+  var t0 = Date.now(), dur = 3200, raf;
+  (function frame() {
+    if (_introSkipped) return;
+    var prog = Math.min((Date.now() - t0) / dur, 1);
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    stars.forEach(function (s) {
+      s.x += s.vx; s.y += s.vy;
+      ctx.globalAlpha = (1 - prog) * 0.85;
+      ctx.fillStyle   = s.col;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    if (prog < 1) { raf = requestAnimationFrame(frame); }
+  })();
+
+  setTimeout(function () {
+    cancelAnimationFrame(raf);
+    skipIntro();
+  }, 3400);
+}
+
+/* ════════════════════════════════════════════
+   背景随运势变化
+   ════════════════════════════════════════════ */
+function applyFortuneBg(score) {
+  var hp = document.querySelector('.home-page');
+  if (!hp) return;
+  hp.querySelectorAll('.fortune-bg,.fortune-rays').forEach(function (el) { el.remove(); });
+  if (score === 3) return; // neutral — no overlay
+  var bg = document.createElement('div');
+  bg.className = 'fortune-bg fortune-bg-' + score;
+  hp.insertBefore(bg, hp.firstChild);
+  if (score === 5) {
+    var rays = document.createElement('div');
+    rays.className = 'fortune-rays';
+    hp.insertBefore(rays, hp.firstChild);
+  }
+}
+
+/* ════════════════════════════════════════════
+   每日签文
+   ════════════════════════════════════════════ */
+var SIGN_POOLS = [
+  [ /* 木 */
+    { lv:'上上签', col:'#f8dc4a', txt:'绿意盎然，万木争春。心中种下的种子，不久将破土而出，好消息就在前方。' },
+    { lv:'上签',   col:'#4ade80', txt:'春风徐来，枝条舒展。困扰你的事，只需给它一点时间，自然会有转机。' },
+    { lv:'中签',   col:'#C8A951', txt:'树木向光而生，即便弯了几回，依然往上长。你也是。' },
+    { lv:'下签',   col:'#f87171', txt:'风吹叶落，根系犹在。静下心来蓄积力量，低谷也是出发点。' },
+    { lv:'上上签', col:'#f8dc4a', txt:'花开在即，水到渠成。正在努力的事，今日会有好的进展。' },
+    { lv:'上签',   col:'#4ade80', txt:'木逢春日最旺，当下出手正是好时机，不要再犹豫了。' },
+    { lv:'中签',   col:'#C8A951', txt:'清明雨后，笋芽破土。变化已在悄悄发生，耐心等候便是。' },
+    { lv:'下签',   col:'#f87171', txt:'枯木逢春，不必灰心。此刻困境，不过是积攒力量的必经之路。' }
+  ],
+  [ /* 火 */
+    { lv:'上上签', col:'#f8dc4a', txt:'烈焰腾空，光芒四射。今日能量充沛，大胆出击必有收获！' },
+    { lv:'上签',   col:'#4ade80', txt:'火焰照亮前路，贵人就在不远处，主动联系会有惊喜。' },
+    { lv:'中签',   col:'#C8A951', txt:'炉火温而不烫，事情正在稳步推进，不要急于求成。' },
+    { lv:'下签',   col:'#f87171', txt:'繁花须防急风。情绪波动时先冷静三秒，再做决定。' },
+    { lv:'上上签', col:'#f8dc4a', txt:'朱雀展翼，凤凰涅槃。勇敢说出心里话，对方正在等你。' },
+    { lv:'上签',   col:'#4ade80', txt:'火树银花，喜气临门。今日尝试新事物，运气站在你这边。' },
+    { lv:'中签',   col:'#C8A951', txt:'夏日炎炎，宜饮清凉。给自己和身边人都留些呼吸的空间。' },
+    { lv:'下签',   col:'#f87171', txt:'灯火需要燃料，你也需要好好休息。今天早点睡吧。' }
+  ],
+  [ /* 土 */
+    { lv:'上上签', col:'#f8dc4a', txt:'厚土载物，福泽绵延。踏踏实实的努力，今日终将开花结果。' },
+    { lv:'上签',   col:'#4ade80', txt:'大地沉稳，贵人从容。慢下来，你会发现答案就在眼前。' },
+    { lv:'中签',   col:'#C8A951', txt:'地气平和，心安则万事安。别想太多，专注眼下一步。' },
+    { lv:'下签',   col:'#f87171', txt:'土地再肥，也需耕耘。今日不宜贪多，做好一件事就够了。' },
+    { lv:'上上签', col:'#f8dc4a', txt:'山水相依，根基稳固。你正在做的事，比你想象的更有价值。' },
+    { lv:'上签',   col:'#4ade80', txt:'稳中求进，步步为营。今天适合把拖延已久的事推进一步。' },
+    { lv:'中签',   col:'#C8A951', txt:'凡事以心为基。整理一下自己的内心，会轻松很多。' },
+    { lv:'下签',   col:'#f87171', txt:'耐心是最好的策略。结果还没来，但过程没有白费。' }
+  ],
+  [ /* 金 */
+    { lv:'上上签', col:'#f8dc4a', txt:'金声玉振，贵气逼人。今日财运亨通，可以大胆规划未来。' },
+    { lv:'上签',   col:'#4ade80', txt:'秋收时节，硕果累累。你付出的努力，正在一一回报。' },
+    { lv:'中签',   col:'#C8A951', txt:'刀刃需磨砺，你的能力也在压力中悄悄升华。' },
+    { lv:'下签',   col:'#f87171', txt:'金属需炼造，压力是淬炼你的炉火，挺过去会更强大。' },
+    { lv:'上上签', col:'#f8dc4a', txt:'白虎护航，逢凶化吉。今天遇到的困难，会比预期更容易解决。' },
+    { lv:'上签',   col:'#4ade80', txt:'铿锵有力，一言九鼎。今天你说的话格外有分量，好好表达自己。' },
+    { lv:'中签',   col:'#C8A951', txt:'锋芒适当收敛，方能走得更远。今日与人合作好过单打独斗。' },
+    { lv:'下签',   col:'#f87171', txt:'金不怕火炼。你正在经历的，是成长的必要代价。' }
+  ],
+  [ /* 水 */
+    { lv:'上上签', col:'#f8dc4a', txt:'流水不腐，灵感涌现。今日思维活跃，适合创作和学习新知识。' },
+    { lv:'上签',   col:'#4ade80', txt:'水善利万物。你今天的善意会流转回来，加倍回报给你。' },
+    { lv:'中签',   col:'#C8A951', txt:'水无定形，随遇而安。放下执念，随缘而行，反而更顺。' },
+    { lv:'下签',   col:'#f87171', txt:'深水藏鱼，静中有机。不必焦虑，机会往往在你不追的时候出现。' },
+    { lv:'上上签', col:'#f8dc4a', txt:'玄水通灵，智慧开光。今日特别适合做重要决策，相信直觉。' },
+    { lv:'上签',   col:'#4ade80', txt:'水往低处流，柔弱胜刚强。放软姿态，反而比较容易达到目的。' },
+    { lv:'中签',   col:'#C8A951', txt:'云淡风轻，顺其自然。今天不必强求，保持轻松状态就好。' },
+    { lv:'下签',   col:'#f87171', txt:'涓涓细流，终成江海。别小看今天的小进步，积累起来就是大成就。' }
+  ]
+];
+
+function getSignForToday() {
+  var today = new Date();
+  var el    = 2; // 默认土
+  if (App.birthInfo) { el = TIAN_WX[getDayGanzhi(today).stem]; }
+  var pool = SIGN_POOLS[el];
+  var seed = today.getDate() * 7 + today.getMonth() * 13 +
+             (App.birthInfo ? App.birthInfo.day * 3 + App.birthInfo.month : 0);
+  return pool[seed % pool.length];
+}
+
+function shakeSign() {
+  var cyl      = document.getElementById('sign-cylinder');
+  var resultEl = document.getElementById('sign-result');
+  var hintEl   = document.getElementById('sign-hint');
+  var today    = new Date();
+  var todayStr = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+
+  /* 摇签动画 */
+  if (!cyl.classList.contains('shaking')) {
+    cyl.classList.add('shaking');
+    setTimeout(function () { cyl.classList.remove('shaking'); }, 700);
+  }
+
+  /* 是否今天已签 */
+  var alreadySigned = localStorage.getItem('signDate') === todayStr;
+  if (!alreadySigned) {
+    localStorage.setItem('signDate', todayStr);
+    trackSignStreak();
+  }
+
+  setTimeout(function () {
+    var sign = getSignForToday();
+    document.getElementById('sign-level').textContent = sign.lv;
+    document.getElementById('sign-level').style.color = sign.col;
+    document.getElementById('sign-text').textContent  = sign.txt;
+    resultEl.style.display = 'block';
+    hintEl.textContent = '今日签已定';
+  }, alreadySigned ? 0 : 680);
+}
+
+function initSignSection() {
+  var today    = new Date();
+  var todayStr = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+  if (localStorage.getItem('signDate') !== todayStr) return;
+  /* 今天已签过，直接显示结果 */
+  var sign = getSignForToday();
+  var resEl = document.getElementById('sign-result');
+  if (!resEl) return;
+  document.getElementById('sign-level').textContent = sign.lv;
+  document.getElementById('sign-level').style.color = sign.col;
+  document.getElementById('sign-text').textContent  = sign.txt;
+  resEl.style.display = 'block';
+  var hintEl = document.getElementById('sign-hint');
+  if (hintEl) hintEl.textContent = '今日签已定';
+}
+
+/* ════════════════════════════════════════════
+   成就系统
+   ════════════════════════════════════════════ */
+var ACHIEVEMENTS_DEF = [
+  { id:'firstBazi',    icon:'📜', name:'命理初探',   desc:'第一次完成八字推演' },
+  { id:'streak7',      icon:'🌟', name:'七星连珠',   desc:'连续7天打开命理星象' },
+  { id:'allCards',     icon:'🃏', name:'命运见证者', desc:'集齐全部22张大阿卡纳' },
+  { id:'star5',        icon:'✨', name:'大吉之日',   desc:'首次获得5星满分运势' },
+  { id:'signStreak5',  icon:'📿', name:'日日占卜',   desc:'连续5天摇签问卦' },
+  { id:'tarot5',       icon:'🔮', name:'塔罗达人',   desc:'完成5次塔罗解读' }
+];
+
+function getAchievements() {
+  try { return JSON.parse(localStorage.getItem('achievements') || '{}'); }
+  catch (e) { return {}; }
+}
+
+function unlockAchievement(id) {
+  var data = getAchievements();
+  if (data[id]) return;
+  var today = new Date();
+  data[id] = today.getFullYear() + '/' + (today.getMonth()+1) + '/' + today.getDate();
+  localStorage.setItem('achievements', JSON.stringify(data));
+  var def = ACHIEVEMENTS_DEF.filter(function (a) { return a.id === id; })[0];
+  if (def) showAchievementPopup(def);
+}
+
+function showAchievementPopup(def) {
+  var old = document.getElementById('ach-popup');
+  if (old) old.remove();
+  var el = document.createElement('div');
+  el.id = 'ach-popup';
+  el.className = 'achievement-popup';
+  el.innerHTML =
+    '<div class="achievement-popup__icon">' + def.icon + '</div>' +
+    '<div class="achievement-popup__body">' +
+      '<div class="achievement-popup__title">成就解锁 ✦</div>' +
+      '<div class="achievement-popup__name">' + def.name + '</div>' +
+      '<div class="achievement-popup__desc">' + def.desc + '</div>' +
+    '</div>';
+  document.body.appendChild(el);
+  setTimeout(function () {
+    el.classList.add('out');
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 420);
+  }, 3600);
+}
+
+function renderAchievements() {
+  var grid = document.getElementById('achievements-grid');
+  if (!grid) return;
+  var data = getAchievements();
+  grid.innerHTML = ACHIEVEMENTS_DEF.map(function (def) {
+    var on = !!data[def.id];
+    return '<div class="achieve-badge' + (on ? ' on' : '') + '">' +
+      '<span class="achieve-badge__icon">' + def.icon + '</span>' +
+      '<span class="achieve-badge__name">' + def.name + '</span>' +
+      (on ? '<span class="achieve-badge__date">' + data[def.id] + '</span>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function checkDailyAchievements(score) {
+  if (score >= 5) unlockAchievement('star5');
+  /* 连续打开 streak */
+  var today    = new Date();
+  var todayStr = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+  var dates    = JSON.parse(localStorage.getItem('visitDates') || '[]');
+  if (dates.indexOf(todayStr) < 0) {
+    dates.push(todayStr);
+    if (dates.length > 40) dates = dates.slice(-40);
+    localStorage.setItem('visitDates', JSON.stringify(dates));
+  }
+  if (dates.length >= 7) {
+    var streak = 1;
+    for (var i = dates.length - 1; i > 0; i--) {
+      var diff = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
+      if (diff === 1) streak++; else break;
+    }
+    if (streak >= 7) unlockAchievement('streak7');
+  }
+}
+
+function trackTarotDraw(name) {
+  var drawn = JSON.parse(localStorage.getItem('drawnTarotNames') || '[]');
+  if (drawn.indexOf(name) < 0) { drawn.push(name); localStorage.setItem('drawnTarotNames', JSON.stringify(drawn)); }
+  if (drawn.length >= TAROT_CARDS.length) unlockAchievement('allCards');
+  var cnt = parseInt(localStorage.getItem('tarotReadingCount') || '0') + 1;
+  localStorage.setItem('tarotReadingCount', cnt);
+  if (cnt >= 5) unlockAchievement('tarot5');
+}
+
+function trackSignStreak() {
+  var today    = new Date();
+  var todayStr = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+  var dates    = JSON.parse(localStorage.getItem('signDates') || '[]');
+  if (dates.indexOf(todayStr) < 0) { dates.push(todayStr); localStorage.setItem('signDates', JSON.stringify(dates)); }
+  if (dates.length >= 5) {
+    var streak = 1;
+    for (var i = dates.length - 1; i > 0; i--) {
+      var diff = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
+      if (diff === 1) streak++; else break;
+    }
+    if (streak >= 5) unlockAchievement('signStreak5');
+  }
+}
+
+/* ════════════════════════════════════════════
+   运势分享卡
+   ════════════════════════════════════════════ */
+function generateFortuneCard() {
+  if (!App.birthInfo) { showToast('请先推演八字，才能生成运势卡 ✦'); return; }
+  var f = computeFortune(App.birthInfo);
+  var today = new Date();
+
+  document.getElementById('fsc-date').textContent  =
+    today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
+  document.getElementById('fsc-lunar').textContent = getLunarDateStr(today);
+
+  var starsHtml = '';
+  for (var i = 1; i <= 5; i++)
+    starsHtml += '<span class="fsc-star" style="color:' + (i <= f.overallScore ? '#C8A951' : 'rgba(200,169,81,.2)') + '">★</span>';
+  document.getElementById('fsc-stars').innerHTML = starsHtml;
+  document.getElementById('fsc-advice').textContent = f.advice;
+
+  var cats = [
+    { icon:'💼', name:'事业', s:f.categoryScores.career },
+    { icon:'❤️', name:'感情', s:f.categoryScores.love },
+    { icon:'💰', name:'财运', s:f.categoryScores.wealth },
+    { icon:'🌿', name:'健康', s:f.categoryScores.health }
+  ];
+  document.getElementById('fsc-cats').innerHTML = cats.map(function (c) {
+    var st = '';
+    for (var j = 1; j <= 5; j++) st += j <= c.s ? '★' : '☆';
+    return '<div class="fsc-cat"><span class="fsc-cat-icon">' + c.icon + '</span>' +
+      '<span class="fsc-cat-name">' + c.name + '</span>' +
+      '<span class="fsc-cat-stars">' + st + '</span></div>';
+  }).join('');
+
+  var sign = getSignForToday();
+  document.getElementById('fsc-sign').textContent = sign ? sign.txt : f.advice;
+
+  document.getElementById('fortune-card-overlay').classList.add('active');
+}
+
+function closeFortCard(e) {
+  if (e.target === document.getElementById('fortune-card-overlay'))
+    document.getElementById('fortune-card-overlay').classList.remove('active');
+}
+
+/* ════════════════════════════════════════════
+   入口
+   ════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function () {
+  initIntroAnimation();
+  initBaziForm();
+  initZodiac();
+  renderCalendar(calState.year, calState.month);
+  initProfile();
+  initHomePage();
+  initSignSection();
+});
+</script>
+</body>
+</html>

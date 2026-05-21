@@ -1,0 +1,141 @@
+<!--pages/home/index.wxml-->
+<!-- 首页 / 今日运势 -->
+<view class="home-page">
+
+  <!-- ── 顶部：用户信息 + 日期 ── -->
+  <view class="header">
+    <view class="header__user">
+      <image
+        class="header__avatar"
+        src="{{userInfo.avatarUrl || '/miniprogram/images/icons/avatar.png'}}"
+        mode="aspectFill"
+      />
+      <view class="header__user-info">
+        <text class="header__nickname">{{userInfo.nickName || '星主'}}</text>
+        <text class="header__greeting">今日运势已为你推演</text>
+      </view>
+    </view>
+    <view class="header__date">
+      <text class="header__date-main">{{todayInfo.lunarDate}}</text>
+      <text class="header__date-solar-term" wx:if="{{todayInfo.solarTerm}}">{{todayInfo.solarTerm}}</text>
+      <text class="header__date-sub">{{todayInfo.date}}</text>
+    </view>
+  </view>
+
+  <!-- ── 综合评分卡 ── -->
+  <view class="overall-card">
+    <view class="overall-card__label">今日综合运势</view>
+    <view class="overall-card__stars">
+      <text
+        wx:for="{{[1,2,3,4,5]}}"
+        wx:key="*this"
+        class="star {{item <= overallScore ? 'star--active' : 'star--dim'}}"
+      >★</text>
+    </view>
+    <text class="overall-card__score-text">{{overallScore}} / 5</text>
+    <text class="overall-card__advice" wx:if="{{advice}}">{{advice}}</text>
+    <text class="overall-card__advice overall-card__advice--placeholder" wx:else>命理数据加载中…</text>
+  </view>
+
+  <!-- ── 分项评分卡片 ── -->
+  <view class="category-row">
+
+    <view class="category-card">
+      <text class="category-card__icon">💼</text>
+      <text class="category-card__name">事业</text>
+      <view class="category-card__stars">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          class="star star--sm {{item <= categoryScores.career ? 'star--active' : 'star--dim'}}"
+        >★</text>
+      </view>
+    </view>
+
+    <view class="category-card">
+      <text class="category-card__icon">❤️</text>
+      <text class="category-card__name">感情</text>
+      <view class="category-card__stars">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          class="star star--sm {{item <= categoryScores.love ? 'star--active' : 'star--dim'}}"
+        >★</text>
+      </view>
+    </view>
+
+    <view class="category-card">
+      <text class="category-card__icon">💰</text>
+      <text class="category-card__name">财运</text>
+      <view class="category-card__stars">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          class="star star--sm {{item <= categoryScores.wealth ? 'star--active' : 'star--dim'}}"
+        >★</text>
+      </view>
+    </view>
+
+    <view class="category-card">
+      <text class="category-card__icon">🌿</text>
+      <text class="category-card__name">健康</text>
+      <view class="category-card__stars">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          class="star star--sm {{item <= categoryScores.health ? 'star--active' : 'star--dim'}}"
+        >★</text>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ── 今日宜忌 ── -->
+  <view class="auspice-section">
+    <view class="auspice-col auspice-col--do">
+      <view class="auspice-col__header">
+        <text class="auspice-col__tag auspice-col__tag--do">宜</text>
+      </view>
+      <view class="auspice-col__list">
+        <view
+          wx:for="{{todoList}}"
+          wx:key="*this"
+          class="auspice-col__item"
+        >
+          <text class="auspice-col__dot auspice-col__dot--do">✦</text>
+          <text class="auspice-col__text">{{item}}</text>
+        </view>
+        <view wx:if="{{!todoList.length}}" class="auspice-col__empty">暂无数据</view>
+      </view>
+    </view>
+
+    <view class="auspice-divider" />
+
+    <view class="auspice-col auspice-col--avoid">
+      <view class="auspice-col__header">
+        <text class="auspice-col__tag auspice-col__tag--avoid">忌</text>
+      </view>
+      <view class="auspice-col__list">
+        <view
+          wx:for="{{avoidList}}"
+          wx:key="*this"
+          class="auspice-col__item"
+        >
+          <text class="auspice-col__dot auspice-col__dot--avoid">✦</text>
+          <text class="auspice-col__text">{{item}}</text>
+        </view>
+        <view wx:if="{{!avoidList.length}}" class="auspice-col__empty">暂无数据</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ── 底部快捷按钮 ── -->
+  <view class="footer-btn-wrap">
+    <button class="footer-btn" bindtap="onTapFullReport">
+      <text class="footer-btn__icon">✦</text>
+      <text class="footer-btn__text">查看完整命理报告</text>
+      <text class="footer-btn__arrow">›</text>
+    </button>
+  </view>
+
+</view>

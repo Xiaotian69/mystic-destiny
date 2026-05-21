@@ -1,0 +1,296 @@
+/* pages/home/index.wxss */
+
+/* ── 页面容器 ── */
+.home-page {
+  min-height: 100vh;
+  background: #1A1033;
+  color: #C8A951;
+  padding: 0 32rpx 48rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+/* ── 顶部：用户信息 + 日期 ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 56rpx;
+}
+
+.header__user {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.header__avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(200,169,81,0.5);
+}
+
+.header__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.header__nickname {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #C8A951;
+  letter-spacing: 2rpx;
+}
+
+.header__greeting {
+  font-size: 22rpx;
+  color: rgba(200,169,81,0.55);
+}
+
+.header__date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4rpx;
+}
+
+.header__date-main {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #C8A951;
+  letter-spacing: 2rpx;
+}
+
+.header__date-solar-term {
+  font-size: 22rpx;
+  color: rgba(200,169,81,0.8);
+  background: rgba(200,169,81,0.12);
+  border-radius: 20rpx;
+  padding: 2rpx 16rpx;
+}
+
+.header__date-sub {
+  font-size: 20rpx;
+  color: rgba(200,169,81,0.4);
+}
+
+/* ── 综合评分卡 ── */
+.overall-card {
+  background: linear-gradient(135deg, rgba(75,0,130,0.6) 0%, rgba(26,16,51,0.8) 100%);
+  border: 1rpx solid rgba(200,169,81,0.25);
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.overall-card__label {
+  font-size: 24rpx;
+  color: rgba(200,169,81,0.6);
+  letter-spacing: 4rpx;
+}
+
+.overall-card__stars {
+  display: flex;
+  gap: 12rpx;
+}
+
+.overall-card__score-text {
+  font-size: 22rpx;
+  color: rgba(200,169,81,0.5);
+  letter-spacing: 2rpx;
+}
+
+.overall-card__advice {
+  font-size: 28rpx;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.7;
+  text-align: center;
+  letter-spacing: 1rpx;
+  padding: 0 8rpx;
+}
+
+.overall-card__advice--placeholder {
+  color: rgba(200,169,81,0.3);
+  font-size: 24rpx;
+}
+
+/* ── 星星通用 ── */
+.star {
+  font-size: 48rpx;
+  transition: color 0.2s;
+}
+
+.star--sm {
+  font-size: 28rpx;
+}
+
+.star--active {
+  color: #C8A951;
+}
+
+.star--dim {
+  color: rgba(200,169,81,0.2);
+}
+
+/* ── 分项评分卡片行 ── */
+.category-row {
+  display: flex;
+  gap: 20rpx;
+}
+
+.category-card {
+  flex: 1;
+  background: rgba(75,0,130,0.35);
+  border: 1rpx solid rgba(200,169,81,0.15);
+  border-radius: 20rpx;
+  padding: 28rpx 0 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.category-card__icon {
+  font-size: 40rpx;
+}
+
+.category-card__name {
+  font-size: 22rpx;
+  color: rgba(200,169,81,0.7);
+  letter-spacing: 2rpx;
+}
+
+.category-card__stars {
+  display: flex;
+  gap: 4rpx;
+}
+
+/* ── 今日宜忌 ── */
+.auspice-section {
+  background: rgba(75,0,130,0.25);
+  border: 1rpx solid rgba(200,169,81,0.15);
+  border-radius: 24rpx;
+  padding: 36rpx 36rpx;
+  display: flex;
+  gap: 0;
+}
+
+.auspice-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.auspice-col__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.auspice-col__tag {
+  font-size: 28rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  padding: 4rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+.auspice-col__tag--do {
+  color: #4ade80;
+  background: rgba(74,222,128,0.12);
+  border: 1rpx solid rgba(74,222,128,0.3);
+}
+
+.auspice-col__tag--avoid {
+  color: #f87171;
+  background: rgba(248,113,113,0.12);
+  border: 1rpx solid rgba(248,113,113,0.3);
+}
+
+.auspice-col__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.auspice-col__item {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.auspice-col__dot {
+  font-size: 18rpx;
+  flex-shrink: 0;
+}
+
+.auspice-col__dot--do {
+  color: #4ade80;
+}
+
+.auspice-col__dot--avoid {
+  color: #f87171;
+}
+
+.auspice-col__text {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.5;
+}
+
+.auspice-col__empty {
+  font-size: 24rpx;
+  color: rgba(200,169,81,0.3);
+}
+
+.auspice-divider {
+  width: 1rpx;
+  background: rgba(200,169,81,0.15);
+  margin: 0 28rpx;
+  align-self: stretch;
+}
+
+/* ── 底部快捷按钮 ── */
+.footer-btn-wrap {
+  margin-top: 8rpx;
+}
+
+.footer-btn {
+  width: 100%;
+  background: linear-gradient(90deg, rgba(200,169,81,0.15) 0%, rgba(75,0,130,0.4) 100%);
+  border: 1rpx solid rgba(200,169,81,0.4);
+  border-radius: 20rpx;
+  padding: 36rpx 40rpx;
+  display: flex;
+  align-items: center;
+  color: #C8A951;
+  box-sizing: border-box;
+}
+
+.footer-btn__icon {
+  font-size: 28rpx;
+  margin-right: 16rpx;
+  color: rgba(200,169,81,0.7);
+}
+
+.footer-btn__text {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+  color: #C8A951;
+}
+
+.footer-btn__arrow {
+  font-size: 40rpx;
+  color: rgba(200,169,81,0.5);
+  line-height: 1;
+}

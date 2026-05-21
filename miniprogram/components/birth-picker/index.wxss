@@ -1,0 +1,10 @@
+/* components/birth-picker/index.wxss */
+.birth-picker {
+  padding: 40rpx;
+  color: #C8A951;
+}
+
+.birth-picker__placeholder {
+  font-size: 28rpx;
+  opacity: 0.6;
+}

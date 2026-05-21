@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+
+# Node (if ever used)
+node_modules/
+
+# Sensitive
+.env
+*.key

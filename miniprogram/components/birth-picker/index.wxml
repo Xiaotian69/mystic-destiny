@@ -1,0 +1,4 @@
+<!--components/birth-picker/index.wxml-->
+<view class="birth-picker">
+  <view class="birth-picker__placeholder">生辰输入组件（待实现）</view>
+</view>

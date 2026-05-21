@@ -1,0 +1,11 @@
+<!--components/fortune-score/index.wxml-->
+<view class="fortune-score fortune-score--{{size}}">
+  <text wx:if="{{label}}" class="fortune-score__label">{{label}}</text>
+  <view class="fortune-score__stars">
+    <text
+      wx:for="{{starList}}"
+      wx:key="*this"
+      class="fortune-score__star {{item <= score ? 'fortune-score__star--active' : ''}}"
+    >★</text>
+  </view>
+</view>

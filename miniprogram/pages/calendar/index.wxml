@@ -1,0 +1,7 @@
+<!--pages/calendar/index.wxml-->
+<view class="calendar-page">
+  <view class="placeholder">
+    <text class="placeholder__title">运势日历</text>
+    <text class="placeholder__hint">UI 待开发</text>
+  </view>
+</view>

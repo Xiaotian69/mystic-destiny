@@ -1,0 +1,4 @@
+<!--components/tarot-card/index.wxml-->
+<view class="tarot-card {{reversed ? 'tarot-card--reversed' : ''}}" bindtap="onTapCard">
+  <view class="tarot-card__placeholder">塔罗牌组件（待实现）</view>
+</view>
