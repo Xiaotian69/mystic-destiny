@@ -2329,6 +2329,105 @@ function hideThinking() {
   }
 }
 
+function shouldUseIframeWorkerTransport() {
+  return !/^https?:$/.test(window.location.protocol);
+}
+
+function fetchWorker(payload) {
+  return fetch(DEEPSEEK_WORKER_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) {
+      return res.json().catch(function() {
+        return { error: { message: 'HTTP ' + res.status } };
+      }).then(function(e) {
+        var err = new Error((e.error && e.error.message) || 'HTTP ' + res.status);
+        err.isWorkerHttpError = true;
+        err.status = res.status;
+        throw err;
+      });
+    }
+    return res.json();
+  });
+}
+
+function postWorkerViaIframe(payload) {
+  return new Promise(function(resolve, reject) {
+    var requestId = 'ds-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    var workerOrigin = new URL(DEEPSEEK_WORKER_URL).origin;
+    var iframe = document.createElement('iframe');
+    var form = document.createElement('form');
+    var timer;
+
+    function cleanup() {
+      window.removeEventListener('message', onMessage);
+      clearTimeout(timer);
+      if (form.parentNode) form.parentNode.removeChild(form);
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    }
+
+    function onMessage(event) {
+      var data = event.data || {};
+      if (event.origin !== workerOrigin) return;
+      if (!data.__deepseekProxy || data.requestId !== requestId) return;
+      cleanup();
+      if (!data.ok) {
+        reject(new Error((data.data && data.data.error && data.data.error.message) || ('HTTP ' + data.status)));
+        return;
+      }
+      resolve(data.data);
+    }
+
+    iframe.name = requestId;
+    iframe.style.display = 'none';
+
+    form.method = 'POST';
+    form.action = DEEPSEEK_WORKER_URL;
+    form.target = requestId;
+    form.enctype = 'application/x-www-form-urlencoded';
+    form.acceptCharset = 'UTF-8';
+    form.style.display = 'none';
+
+    [
+      ['transport', 'iframe'],
+      ['requestId', requestId],
+      ['payload', JSON.stringify(payload)]
+    ].forEach(function(item) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = item[0];
+      input.value = item[1];
+      form.appendChild(input);
+    });
+
+    window.addEventListener('message', onMessage);
+    timer = setTimeout(function() {
+      cleanup();
+      reject(new Error('本地文件请求超时，请改用线上地址打开'));
+    }, 45000);
+
+    document.body.appendChild(iframe);
+    document.body.appendChild(form);
+    form.submit();
+  });
+}
+
+function sendWorkerRequest(payload) {
+  if (shouldUseIframeWorkerTransport()) {
+    return postWorkerViaIframe(payload);
+  }
+
+  return fetchWorker(payload).catch(function(err) {
+    if (err && err.isWorkerHttpError) throw err;
+    return postWorkerViaIframe(payload);
+  });
+}
+
 /* ════════════════════════════════════════════
    组装上下文 → 调用 DeepSeek API
    ════════════════════════════════════════════ */
@@ -2419,30 +2518,21 @@ function askMaster(question, mode) {
     '【我的问题】' + question;
 
   /* ── 4. 调用 DeepSeek Worker ── */
-  return fetch(DEEPSEEK_WORKER_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model:       'deepseek-v4-flash',
-      temperature: 0.85,
-      max_tokens:  maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userPrompt   }
-      ]
-    })
-  })
-  .then(function(res) {
-    if (!res.ok) {
-      return res.json().then(function(e) {
-        throw new Error((e.error && e.error.message) || 'HTTP ' + res.status);
-      });
-    }
-    return res.json();
-  })
+  var payload = {
+    model:       'deepseek-v4-flash',
+    temperature: 0.85,
+    max_tokens:  maxTokens,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userPrompt   }
+    ]
+  };
+
+  return sendWorkerRequest(payload)
   .then(function(data) {
+    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('AI 返回格式异常');
+    }
     return data.choices[0].message.content.trim();
   });
 }

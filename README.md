@@ -14,7 +14,7 @@
 https://xiaotian69.github.io/mystic-destiny/
 ```
 
-电脑本地打开 `index.html` 可用于预览；手机端请使用上面的 HTTPS 在线地址。不要在微信/手机浏览器里直接打开本地 HTML 文件，否则移动浏览器可能会拦截 AI 请求并显示 `Load failed`。
+电脑本地打开 `index.html` 可用于预览；手机端优先使用上面的 HTTPS 在线地址。若下载 HTML 后用 Edge 等手机浏览器打开，前端会自动切换到隐藏表单/iframe 兼容通道，以绕过本地文件环境对 `fetch` 的拦截。
 
 如需重播开场粒子动画，在地址后追加 `?intro=1`：
 
