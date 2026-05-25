@@ -8,7 +8,19 @@
 
 ## 在线体验
 
-本地打开 `index.html` 即可，或部署至任意静态托管服务（GitHub Pages、Cloudflare Pages 等）。
+在线地址：
+
+```text
+https://xiaotian69.github.io/mystic-destiny/
+```
+
+电脑本地打开 `index.html` 可用于预览；手机端请使用上面的 HTTPS 在线地址。不要在微信/手机浏览器里直接打开本地 HTML 文件，否则移动浏览器可能会拦截 AI 请求并显示 `Load failed`。
+
+如需重播开场粒子动画，在地址后追加 `?intro=1`：
+
+```text
+https://xiaotian69.github.io/mystic-destiny/?intro=1
+```
 
 ---
 
@@ -114,17 +126,17 @@ python -m http.server 8080
 4. 进入 Worker 的 **Settings → Variables and Secrets**
 5. 添加变量：`DEEPSEEK_API_KEY` = 你的 DeepSeek API Key（类型选 Secret）
 6. 复制 Worker 部署地址（形如 `https://xxx.workers.dev`）
-7. 在 `index.html` 顶部找到以下行并替换：
+7. 在 `index.html` 中找到以下行并替换为你的 Worker 地址：
 
 ```javascript
-const WORKER_URL = 'https://divine-cell-3e23.andyzhao722.workers.dev';
+const DEEPSEEK_WORKER_URL = 'https://divine-cell-3e23.andyzhao722.workers.dev';
 ```
 
 ### DeepSeek API
 
 - 官网：https://platform.deepseek.com/
 - 注册后在 API Keys 页面创建密钥
-- 模型：`deepseek-chat`
+- 默认模型：`deepseek-v4-flash`（可在 Worker 环境变量中用 `DEEPSEEK_MODEL=deepseek-v4-pro` 切换）
 
 ---
 
@@ -134,7 +146,7 @@ const WORKER_URL = 'https://divine-cell-3e23.andyzhao722.workers.dev';
 |------|------|
 | 框架 | 无框架，原生 HTML / CSS / JS |
 | 依赖 | 零依赖（无 npm，无构建工具） |
-| AI 模型 | DeepSeek Chat（`deepseek-chat`） |
+| AI 模型 | DeepSeek（默认 `deepseek-v4-flash`） |
 | 代理 | Cloudflare Workers |
 | 存储 | `localStorage`（生辰、成就、签文记录等） |
 | 字体 | 系统字体栈（无外部字体请求） |

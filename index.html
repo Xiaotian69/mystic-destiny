@@ -2267,7 +2267,7 @@ function clearCache() {
 /* ════════════════════════════════════════════
    API 配置（通过 Cloudflare Worker 代理）
    ════════════════════════════════════════════ */
-const CLAUDE_API_URL = "https://divine-cell-3e23.andyzhao722.workers.dev";
+const DEEPSEEK_WORKER_URL = "https://divine-cell-3e23.andyzhao722.workers.dev";
 
 /* ════════════════════════════════════════════
    AI 玄学大师聊天
@@ -2418,14 +2418,14 @@ function askMaster(question, mode) {
     tarotQ + '\n' +
     '【我的问题】' + question;
 
-  /* ── 4. 调用 Claude API ── */
-  return fetch(CLAUDE_API_URL, {
+  /* ── 4. 调用 DeepSeek Worker ── */
+  return fetch(DEEPSEEK_WORKER_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model:       'deepseek-chat',
+      model:       'deepseek-v4-flash',
       temperature: 0.85,
       max_tokens:  maxTokens,
       messages: [
@@ -2498,8 +2498,13 @@ function skipIntro() {
 }
 
 function initIntroAnimation() {
-  if (localStorage.getItem('hasVisited')) return; // not first visit
-  localStorage.setItem('hasVisited', '1');
+  var forceIntro = false;
+  try {
+    var params = new URLSearchParams(window.location.search || '');
+    forceIntro = params.get('intro') === '1' || params.get('replayIntro') === '1';
+  } catch (e) {}
+  if (!forceIntro && localStorage.getItem('hasVisited')) return; // not first visit
+  if (!forceIntro) localStorage.setItem('hasVisited', '1');
 
   var ov  = document.getElementById('intro-overlay');
   var cvs = document.getElementById('intro-canvas');

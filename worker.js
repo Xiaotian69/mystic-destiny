@@ -4,8 +4,9 @@ const RATE_LIMIT = 10;
 const WINDOW_MS  = 60_000;
 const MAX_TOKENS = 2000;
 
-const DEEPSEEK_API_KEY = "sk-0903d54ca4324a50bff180bd277c2904";
-const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+const DEFAULT_MODEL = "deepseek-v4-flash";
+const ALLOWED_MODELS = new Set(["deepseek-v4-flash", "deepseek-v4-pro"]);
 
 function checkRateLimit(ip) {
   const now   = Date.now();
@@ -20,12 +21,19 @@ function checkRateLimit(ip) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders() });
     }
+    if (request.method === 'GET' || request.method === 'HEAD') {
+      return json({ ok: true, service: 'deepseek-proxy' });
+    }
     if (request.method !== 'POST') {
       return new Response('Method Not Allowed', { status: 405 });
+    }
+
+    if (!env?.DEEPSEEK_API_KEY) {
+      return json({ error: { message: 'Cloudflare Secret DEEPSEEK_API_KEY 未配置' } }, 500);
     }
 
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
@@ -41,19 +49,43 @@ export default {
       return json({ error: { message: '无效请求' } }, 400);
     }
 
-    body.max_tokens = Math.min(body.max_tokens ?? MAX_TOKENS, MAX_TOKENS);
-    body.model      = 'deepseek-chat';
+    const configuredModel = env?.DEEPSEEK_MODEL || DEFAULT_MODEL;
+    const model = ALLOWED_MODELS.has(configuredModel) ? configuredModel : DEFAULT_MODEL;
+    const upstreamBody = {
+      ...body,
+      model,
+      stream: false,
+      max_tokens: Math.min(body.max_tokens ?? MAX_TOKENS, MAX_TOKENS),
+      thinking: body.thinking || { type: 'disabled' },
+    };
 
-    const resp = await fetch(DEEPSEEK_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + DEEPSEEK_API_KEY,
-      },
-      body: JSON.stringify(body),
-    });
+    let resp;
+    try {
+      resp = await fetch(DEEPSEEK_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': 'Bearer ' + env.DEEPSEEK_API_KEY,
+        },
+        body: JSON.stringify(upstreamBody),
+      });
+    } catch (err) {
+      return json({ error: { message: 'DeepSeek 上游连接失败：' + (err?.message || '网络异常') } }, 502);
+    }
 
-    const data = await resp.json();
+    const raw = await resp.text();
+    let data;
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch {
+      return json({
+        error: {
+          message: 'DeepSeek 返回了非 JSON 响应',
+          detail: raw.slice(0, 300),
+        },
+      }, resp.status || 502);
+    }
+
     return json(data, resp.status);
   }
 };
@@ -61,7 +93,7 @@ export default {
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...corsHeaders() },
   });
 }
 
