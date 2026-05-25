@@ -2265,10 +2265,9 @@ function clearCache() {
 }
 
 /* ════════════════════════════════════════════
-   DeepSeek 直连配置
+   API 配置（通过 Cloudflare Worker 代理）
    ════════════════════════════════════════════ */
-const DEEPSEEK_API_KEY = "";
-const DEEPSEEK_API_URL = "https://divine-cell-3e23.andyzhao722.workers.dev";
+const CLAUDE_API_URL = "https://divine-cell-3e23.andyzhao722.workers.dev";
 
 /* ════════════════════════════════════════════
    AI 玄学大师聊天
@@ -2419,8 +2418,8 @@ function askMaster(question, mode) {
     tarotQ + '\n' +
     '【我的问题】' + question;
 
-  /* ── 4. 调用 DeepSeek API ── */
-  return fetch(DEEPSEEK_API_URL, {
+  /* ── 4. 调用 Claude API ── */
+  return fetch(CLAUDE_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -2431,7 +2430,7 @@ function askMaster(question, mode) {
       max_tokens:  maxTokens,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userPrompt  }
+        { role: 'user',   content: userPrompt   }
       ]
     })
   })
