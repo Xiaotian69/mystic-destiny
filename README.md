@@ -30,9 +30,9 @@
 | --- | --- |
 | ![今日运势移动端界面](docs/assets/screenshots/mobile-home.png) | ![塔罗牌阵移动端界面](docs/assets/screenshots/tarot-reading.png) |
 
-| 运势日历 | 运势分享卡（桌面视口） |
+| 运势日历 | 运势分享卡（紧裁预览） |
 | --- | --- |
-| ![运势日历移动端界面](docs/assets/screenshots/fortune-calendar.png) | ![运势分享卡桌面界面](docs/assets/screenshots/home-fortune.png) |
+| ![运势日历移动端界面](docs/assets/screenshots/fortune-calendar.png) | ![运势分享卡紧裁预览](docs/assets/screenshots/fortune-share-card.png) |
 
 截图使用合成生辰与合成提问采集，不包含个人资料或聊天记录。
 
