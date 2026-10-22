@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280, initial-scale=1">
+  <title>Mystic Destiny social preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1280px; height: 640px; overflow: hidden; }
+    body { color: #f8f1df; font-family: Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #110823; }
+    .canvas {
+      position: relative; width: 100%; height: 100%; padding: 66px 74px; overflow: hidden;
+      background:
+        radial-gradient(circle at 75% 45%, rgba(112,48,180,.35), transparent 38%),
+        radial-gradient(circle at 5% 100%, rgba(200,169,81,.13), transparent 30%),
+        linear-gradient(135deg, #170b2b, #0c061a);
+    }
+    .canvas::before { content: ""; position: absolute; left: 43px; top: 40px; width: 520px; height: 520px; border: 1px solid rgba(200,169,81,.11); border-radius: 50%; box-shadow: 0 0 0 42px rgba(200,169,81,.025), 0 0 0 92px rgba(200,169,81,.018); }
+    .copy { position: relative; z-index: 3; width: 640px; }
+    .kicker { color: #c8a951; font-size: 16px; font-weight: 700; letter-spacing: 4px; }
+    h1 { margin: 28px 0 17px; font-family: Georgia, "Songti SC", serif; font-size: 57px; line-height: 1.1; font-weight: 500; }
+    h1 em { display: block; margin-top: 11px; color: #dcc574; font-size: 42px; font-style: normal; letter-spacing: 5px; }
+    .tagline { color: rgba(248,241,223,.77); font-family: Georgia, serif; font-size: 22px; }
+    .features { margin-top: 28px; color: #d0b661; font-size: 15px; letter-spacing: 1.4px; }
+    .line { width: 380px; height: 1px; margin: 25px 0 22px; background: linear-gradient(90deg, #c8a951, transparent); }
+    .star { position: absolute; color: #d8bd6a; } .a { left: 52px; top: 308px; } .b { left: 607px; top: 72px; font-size: 9px; } .c { right: 44px; bottom: 38px; font-size: 18px; }
+    .phone { position: absolute; top: 35px; overflow: hidden; border: 1px solid rgba(216,189,106,.52); border-radius: 27px; background: #160b2a; box-shadow: 0 25px 55px rgba(0,0,0,.55); }
+    .phone::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 5px rgba(10,4,24,.68); }
+    .phone img { width: 100%; height: 100%; object-fit: cover; }
+    .home { right: 273px; width: 261px; height: 565px; transform: rotate(-4deg); }
+    .tarot { right: 38px; top: 69px; width: 238px; height: 515px; transform: rotate(4deg); }
+    .arc { position: absolute; right: -214px; top: -248px; width: 680px; height: 680px; border: 1px solid rgba(200,169,81,.14); border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <main class="canvas">
+    <span class="star a">✦</span><span class="star b">✦</span><span class="star c">✦</span><div class="arc"></div>
+    <section class="copy">
+      <div class="kicker">MYSTIC DESTINY · 命理星象</div>
+      <h1>Ancient symbols.<br>Modern interaction.<em>命理星象</em></h1>
+      <div class="line"></div>
+      <div class="tagline">Fortune · Tarot · Astrology · AI interpretation</div>
+      <div class="features">IMMERSIVE H5 EXPERIENCE</div>
+    </section>
+    <figure class="phone home"><img src="screenshots/mobile-home.png" alt="Daily fortune home"></figure>
+    <figure class="phone tarot"><img src="screenshots/tarot-reading.png" alt="Tarot reading"></figure>
+  </main>
+</body>
+</html>
